@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: quorum
+          POSTGRES_PASSWORD: quorum
+          POSTGRES_DB: quorum
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://quorum:quorum@localhost:5432/quorum
+      APP_URL: http://localhost:3000
+      MAIL_DRIVER: console
+      MAIL_FROM: Quorum <code@exemple.fr>
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Installer pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Configurer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Installer les dépendances
+        run: pnpm install --frozen-lockfile
+
+      - name: Appliquer les migrations PostgreSQL
+        run: pnpm db:migrate
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Vérification TypeScript
+        run: pnpm typecheck
+
+      - name: Tests unitaires et invariants
+        run: pnpm test
+
+      - name: Build Next.js
+        run: pnpm build

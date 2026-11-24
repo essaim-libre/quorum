@@ -1,0 +1,26 @@
+# Dépendances
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+
+# Variables d'environnement (ne jamais commiter de secrets)
+.env
+.env.*
+!.env.example
+
+# Tests & couverture
+coverage/
+playwright-report/
+test-results/
+
+# Logs & artefacts locaux
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+next-env.d.ts
