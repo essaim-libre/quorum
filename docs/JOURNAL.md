@@ -104,3 +104,19 @@ Reste :
 - **J6 — Mode amphi, « Comment ça marche », journal, page données personnelles.**
 Bloquant / question pour Junior :
 - Aucun.
+
+## 2026-11-24 23:43 — Antigravity — Bilan de fin de session (J0 à J5 terminés)
+Fait :
+- Jalons terminés et commités sur `main` :
+  - **J0 — Socle** (`6addb97`) : Next.js 16 (App Router, `output: "standalone"`), TypeScript strict, Tailwind v4 + tokens noir/blanc/gris §10, polices auto-hébergées `Schibsted Grotesk` & `IBM Plex Mono`, Drizzle ORM + PostgreSQL 16 (`docker-compose.yml`), migrations SQL avec triggers d'immutabilité/urne, `env.ts` (Zod), `log.ts` (masquage emails), `clock.ts`, règle ESLint invariant n°4, CI GitHub Actions.
+  - **J1 — Connexion** (`fe9bcea`) : OTP 6 chiffres (`randomInt`, TTL 10 min, 5 essais, `timingSafeEqual`), normalisation email `@etu.u-bordeaux.fr` (sans `+`), sessions 30 j (`__Host-quorum_session`), rate limiting `lru-cache` (sel IP quotidien), `MAIL_DRIVER=console|scaleway`, écrans accueil / email / code 6 cases (renvoi 60 s) et déconnexion.
+  - **J2 — Votes en lecture et administration** (`aec932c`) : clés RSA 2048 par vote chiffrées AES-256-GCM (`MASTER_KEY`), règles §2 (`Vote blanc` auto, 24 h–14 j), création/édition brouillons, publication immuable, annulation motivée, journal public (`admin_journal`), pages `/votes`, `/votes/[slug]`, `/admin`, `/journal`.
+  - **J3 — Vote anonyme** (`b205366`) : `@cloudflare/blindrsa-ts` (RFC 9474, `RSABSSA-SHA384-PSS-Randomized`) vérifié sur le vecteur officiel annexe A.1, reçu Crockford Base32 `XX-XXXX-XXX`, Phase 1 (`POST /api/votes/[slug]/token`, idempotence), Phase 2 (`POST /api/ballots`, sans cookie ni import auth, revote jusqu'à 20 révisions), IndexedDB sans stockage du choix (invariant n°10), écrans Bulletin / Confirmation / A voté / Mes reçus, aide locale `devCode` en `development` + `MAIL_DRIVER=console`.
+  - **J4 — Clôture et résultats** (`777b407`) : table `vote_receipts` + trigger, dépouillement pur §2.2, clôture idempotente (`results`, `tokens_issued`, suppression `emargement`, `private_key_enc = null`, `VACUUM emargement`), procès-verbal PDF 1.4 autonome (`/api/votes/[slug]/pv.pdf`), `/api/votes/[slug]/receipts`, `/api/internal/cron`, pages `/votes/[slug]/resultats` et `/votes/[slug]/recus`.
+  - **J5 — Pétitions** (`0415d8b`) : dépôt (1 active, 3/mois, option décision d'AG, charte §3.5), signatures pseudonymes, arguments « Contre » + soutien unique remplaçable, file de relecture admin (`approve`, `request_changes`, `reject`), acceptation de reformulation par l'auteur, expiration et publication automatique après 48 h branchées au cron, écrans `/proposer`, `/petitions`, `/petitions/[slug]` et file de relecture `/admin`.
+- État de vérification : `pnpm lint`, `pnpm typecheck`, `pnpm test` (16 fichiers / 57 tests), `pnpm test:e2e` (3 tests E2E Chromium) et `pnpm build` tous verts.
+Reste pour la prochaine session :
+- **J6** : Mode amphi (`/amphi/[slug]` avec QR code local, compte à rebours, rafraîchissement 10 s, zéro résultat avant clôture), page `/comment-ca-marche` complète (ticket tamponné, perte d'appareil, lien journal), enrichissement `/journal`, page `/donnees-personnelles` (§15 RGPD).
+- **J7** : Durcissement (en-têtes/CSP, revue des logs, Playwright complet, test de charge 500 jetons + 500 bulletins en 2 min, Dockerfile et préparation déploiement Scaleway).
+Bloquant / question pour Junior :
+- Pour reprendre demain : démarrer Docker Desktop puis `docker compose up -d db` et `pnpm dev`.
