@@ -3,6 +3,10 @@ import { constantTimeEqual } from "@/lib/crypto/hmac";
 import { getDb, getPool } from "@/lib/db/client";
 import { getEnv } from "@/lib/env";
 import { log } from "@/lib/log";
+import {
+  processDuePetitions,
+  purgeEndedPetitionsPersonalTags,
+} from "@/lib/petitions/service";
 import { closeAllDueVotes, runScheduledPurges } from "@/lib/votes/close";
 
 function extractCronSecret(headers: Headers): string | null {
@@ -35,20 +39,28 @@ export async function POST(request: Request): Promise<NextResponse> {
     const db = getDb();
     const pool = getPool();
     const { closedCount } = await closeAllDueVotes(db, pool);
+    const petitionCycles = await processDuePetitions(db);
     const purges = await runScheduledPurges(db);
+    const petitionPurges = await purgeEndedPetitionsPersonalTags(db);
 
     log("info", "cron.completed", {
       closedCount,
+      expiredPetitions: petitionCycles.expiredCount,
+      autoApprovedPetitions: petitionCycles.autoApprovedCount,
       purgedOtpCodes: purges.purgedOtpCodes,
       purgedSessions: purges.purgedSessions,
+      purgedPetitions: petitionPurges.purgedPetitions,
     });
 
     return NextResponse.json(
       {
         ok: true,
         closedVotes: closedCount,
+        expiredPetitions: petitionCycles.expiredCount,
+        autoApprovedPetitions: petitionCycles.autoApprovedCount,
         purgedOtpCodes: purges.purgedOtpCodes,
         purgedSessions: purges.purgedSessions,
+        purgedPetitions: petitionPurges.purgedPetitions,
       },
       { status: 200 },
     );

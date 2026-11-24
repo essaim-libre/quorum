@@ -87,3 +87,20 @@ Reste :
 - **J5 — Pétitions** : §3 complet, Proposer, Signatures, « Contre », relecture, publication automatique après 48 h.
 Bloquant / question pour Junior :
 - Aucun.
+
+## 2026-11-24 23:41 — Antigravity — J5
+Fait :
+- Implémenté le cycle de vie complet des pétitions §3 (`src/lib/petitions/rules.ts` et `src/lib/petitions/service.ts`) :
+  - Dépôt limité à 1 pétition active et 3 par mois par auteur (`HMAC(K_SIG, voter_id ‖ "author")`), signature automatique de l'auteur, option décision d'AG (date, lieu, présents, résultat).
+  - Signatures pseudonymes uniques (`HMAC(K_SIG, voter_id ‖ petition_id)`), passage automatique en `in_review` avec échéance 48 h au seuil (`PETITION_THRESHOLD`).
+  - Arguments « Contre » (≤ 600 car.) et soutien unique remplaçable par pétition, sélection du plus soutenu (plus ancien en cas d'égalité) lors de la publication du vote.
+  - Relecture admin (`approve` avec ouverture ≤ 24 h et faits sourcés optionnels, `request_changes` avec acceptation/refus par l'auteur uniquement, `reject` sur liste fermée de 4 motifs), toutes journalisées publiquement dans `admin_journal` (invariant n°9).
+  - Expiration automatique après `collect_until`, publication automatique après 48 h sans décision (`petition.auto_approve`), et purge RGPD 30 jours branchées dans `POST /api/internal/cron`.
+- Créé les 7 routes API pétitions §8 (`GET/POST /api/petitions`, `GET /api/petitions/[slug]`, `POST /api/petitions/[slug]/sign`, `POST /api/petitions/[slug]/contre`, `POST /api/contre/[id]/support`, `POST /api/petitions/[slug]/accept-rewording`, `POST /api/admin/petitions/[id]/review`).
+- Construit les écrans §9/§10 : `/proposer` (4 étapes Question · Options · Arguments · Durée, charte §3.5 avec contre-exemple barré et exemple conforme, case décision d'AG), `/petitions` (En collecte · En relecture), `/petitions/[slug]` (09 Signatures + arguments Contre + acceptation de reformulation), et la file de relecture dans `/admin` (`AdminPetitionQueue`).
+- Livré les tests J5 (`tests/unit/petitions.test.ts` et `tests/e2e/petitions-flow.spec.ts` avec 300 signatures simulées).
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` (16 fichiers / 57 tests), `pnpm test:e2e` (3 tests E2E Chromium) et `pnpm build` verts.
+Reste :
+- **J6 — Mode amphi, « Comment ça marche », journal, page données personnelles.**
+Bloquant / question pour Junior :
+- Aucun.

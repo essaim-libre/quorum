@@ -21,7 +21,9 @@ export function BottomNav() {
       <div className="quorum-container grid grid-cols-3">
         {items.map((item) => {
           const active =
-            pathname === item.href || pathname.startsWith(`${item.href}/`);
+            pathname === item.href ||
+            pathname.startsWith(`${item.href}/`) ||
+            (item.href === "/proposer" && pathname.startsWith("/petitions"));
           return (
             <Link
               key={item.href}

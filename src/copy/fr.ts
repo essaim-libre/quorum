@@ -70,7 +70,8 @@ export const copy = {
     argumentsTitle: "Arguments",
     argumentPourTab: "Pour",
     argumentContreTab: "Contre",
-    argumentContreEmpty: "Aucun argument contre n’a été déposé.",
+    argumentContreEmpty:
+      "Aucun argument contre n’a été déposé pendant la collecte.",
     signedBy: (author: string) => `Signé : ${author}`,
     factsTitle: "Ce que ça change concrètement",
     optionsTitle: "Options proposées",
@@ -151,9 +152,88 @@ export const copy = {
       "vote.publish": "Publication d’un scrutin",
       "vote.cancel": "Annulation d’un scrutin",
       "petition.approve": "Approbation d’une pétition",
+      "petition.auto_approve": "Publication automatique (48 h)",
       "petition.request_changes": "Demande de reformulation",
       "petition.reject": "Rejet d’une pétition",
     },
+  },
+  petitions: {
+    proposeTitle: "Proposer une question",
+    listTitle: "Pétitions",
+    tabPropose: "Déposer une pétition",
+    tabList: "Pétitions en cours",
+    views: {
+      collecting: "En collecte",
+      in_review: "En relecture",
+    },
+    states: {
+      collecting: "En collecte",
+      in_review: "En relecture",
+      changes_requested: "Reformulation demandée",
+      approved: "Approuvée · vote publié",
+      rejected: "Rejetée",
+      expired: "Expirée",
+    },
+    empty: {
+      collecting: "Aucune pétition en collecte pour le moment.",
+      in_review: "Aucune pétition en attente de relecture.",
+    },
+    countLabel: (count: number) =>
+      count <= 1 ? `${count} pétition` : `${count} pétitions`,
+    signaturesProgress: (count: string, threshold: string) =>
+      `${count} / ${threshold} signatures`,
+    collectEndsIn: (remaining: string) => `Fin de collecte dans ${remaining}`,
+    reviewEndsAt: (date: string) => `Publication auto au plus tard le ${date}`,
+    steps: ["Question", "Options", "Arguments", "Durée"] as const,
+    charterTitle: "Charte de formulation",
+    charterRules: [
+      "Elle pose une seule question.",
+      "Elle ne contient ni adjectif de valeur ni sous-entendu.",
+      "Elle nomme une action concrète, son périmètre et ses dates quand il y en a.",
+      "Ses options sont mutuellement exclusives.",
+    ] as const,
+    charterBadExample:
+      "Face à la casse de l’université, faut-il sauver nos conditions d’étude ?",
+    charterGoodExample:
+      "Bloquer le campus Peixotto du 30 nov. au 4 déc. ?",
+    agCheckbox: "C’est une décision d’AG",
+    agDateLabel: "Date de l’AG",
+    agLocationLabel: "Lieu (ex. amphi A)",
+    agAttendeesLabel: "Nombre de présents",
+    agResultLabel: "Résultat du vote à main levée",
+    durationLabel: "Durée souhaitée du vote (heures, 24 h à 14 jours)",
+    durationPresets: [
+      { hours: 24, label: "24 h" },
+      { hours: 72, label: "72 h (par défaut)" },
+      { hours: 168, label: "7 jours" },
+      { hours: 336, label: "14 jours" },
+    ] as const,
+    submitPetition: "Déposer la pétition",
+    submittingPetition: "Dépôt en cours…",
+    signCta: "Signer cette pétition",
+    signingCta: "Signature…",
+    alreadySignedLabel: "Tu as déjà signé cette pétition.",
+    loginToSign: "Connecte-toi pour signer ou déposer un argument.",
+    seePublishedVote: "Voir le vote publié",
+    rewordingTitle: "Reformulation demandée (charte)",
+    acceptRewording: "Accepter la reformulation",
+    refuseRewording: "Refuser et maintenir ma question",
+    contreSectionTitle: "Arguments « Contre »",
+    contreIntro:
+      "Tout étudiant peut proposer un texte Contre et soutenir une seule proposition. La plus soutenue figurera sur la page du vote.",
+    contreEmpty: "Aucun argument contre n’a été déposé pour le moment.",
+    contreTextLabel: "Ton argument Contre (600 caractères max.)",
+    contreAuthorLabel: "Signature libre (ex. « Anonyme », « Étudiants L2 »)",
+    contreSubmit: "Déposer cet argument Contre",
+    supportAction: "Soutenir",
+    supportedAction: "Soutenu",
+    supportsCount: (count: number) =>
+      count <= 1 ? `${count} soutien` : `${count} soutiens`,
+    adminQueueTitle: "File de relecture des pétitions",
+    adminQueueEmpty: "Aucune pétition en attente de relecture.",
+    adminApprove: "Approuver et publier le vote",
+    adminRequestChanges: "Demander une reformulation",
+    adminReject: "Rejeter",
   },
   me: {
     title: "Moi",
@@ -276,6 +356,15 @@ export const copy = {
     invalid_option: "L’option choisie n’appartient pas à ce scrutin.",
     max_revisions_reached:
       "Tu as atteint la limite de 20 modifications pour ce scrutin.",
+    active_petition_exists:
+      "Tu as déjà une pétition active. Attends qu’elle aboutisse ou expire avant d’en déposer une autre.",
+    monthly_petition_limit:
+      "Tu as atteint la limite de 3 pétitions déposées ce mois-ci.",
+    petition_not_collecting:
+      "Cette pétition n’est plus ouverte aux signatures.",
+    invalid_state: "Cette action n’est pas possible dans l’état actuel de la pétition.",
+    invalid_opens_at:
+      "La date d’ouverture doit être fixée au plus tard 24 heures après l’approbation.",
     network_error:
       "Impossible de joindre le serveur. Vérifie ta connexion et réessaie.",
   },

@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AdminPetitionQueue } from "@/components/AdminPetitionQueue";
 import { AdminVotesManager } from "@/components/AdminVotesManager";
 import { copy } from "@/copy/fr";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
+import { listAdminPetitionsForReview } from "@/lib/petitions/service";
 import { listAdminVotes } from "@/lib/votes/service";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +35,11 @@ export default async function AdminPage() {
     );
   }
 
-  const votes = await listAdminVotes(getDb());
+  const db = getDb();
+  const [votes, reviewPetitions] = await Promise.all([
+    listAdminVotes(db),
+    listAdminPetitionsForReview(db),
+  ]);
 
   return (
     <main className="quorum-container py-6">
@@ -56,6 +62,7 @@ export default async function AdminPage() {
         </h1>
       </div>
 
+      <AdminPetitionQueue petitions={reviewPetitions} />
       <AdminVotesManager initialVotes={votes} />
     </main>
   );
