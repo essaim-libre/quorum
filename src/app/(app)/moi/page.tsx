@@ -25,9 +25,15 @@ export default async function MePage() {
         <p className="text-meta text-ink-2">{copy.me.connectedLabel}</p>
         <p className="text-body mt-1 text-ink">{copy.me.connectedValue}</p>
         {session.isAdmin && (
-          <p className="text-mono-xs mt-2 text-ink-2">
-            {copy.me.adminRoleNote}
-          </p>
+          <div className="mt-3 flex flex-col items-start gap-1">
+            <p className="text-mono-xs text-ink-2">{copy.me.adminRoleNote}</p>
+            <Link
+              href="/admin"
+              className="inline-flex min-h-[48px] items-center text-meta font-bold text-ink underline underline-offset-4"
+            >
+              {copy.me.adminLink}
+            </Link>
+          </div>
         )}
       </section>
 
@@ -38,12 +44,18 @@ export default async function MePage() {
         <p className="text-body mt-3 text-ink-2">{copy.me.receiptsEmpty}</p>
       </section>
 
-      <section className="quorum-rule flex flex-col items-start gap-2 pt-6">
+      <section className="quorum-rule flex flex-col items-start gap-1 pt-6">
         <Link
           href="/comment-ca-marche"
           className="inline-flex min-h-[48px] items-center text-body text-ink underline underline-offset-4"
         >
           {copy.me.howItWorksLink}
+        </Link>
+        <Link
+          href="/journal"
+          className="inline-flex min-h-[48px] items-center text-body text-ink underline underline-offset-4"
+        >
+          {copy.me.journalLink}
         </Link>
         <LogoutButton />
       </section>

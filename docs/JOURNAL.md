@@ -42,3 +42,15 @@ Reste :
 - **J2 — Votes en lecture et administration** : création, brouillon, publication avec génération de clé RSA 2048 chiffrée AES-256-GCM, annulation motivée, journal public, pages Votes et Question.
 Bloquant / question pour Junior :
 - Aucun.
+
+## 2026-11-24 22:57 — Antigravity — J2
+Fait :
+- Ajouté le chiffrement AES-256-GCM des clés privées (`src/lib/crypto/aead.ts`, format `nonce(12) ‖ ciphertext ‖ tag(16)`) et la génération des paires RSA 2048 (`e = 65537`) par vote avec empreinte `SHA-256(SPKI)` (`src/lib/crypto/vote-keys.ts`).
+- Implémenté les règles de vote §2 (`src/lib/votes/rules.ts`, ajout automatique de « Vote blanc », durée 24 h–14 j, slugs, statut via `now()` PostgreSQL), le formatage `Europe/Paris` (`src/lib/dates.ts`), le journal public (`src/lib/journal.ts`) et le service complet (`src/lib/votes/service.ts`).
+- Créé les routes API §8 : `GET /api/votes`, `GET /api/votes/:slug` (sans aucun décompte avant clôture, invariant n°5), `GET /api/votes/:slug/participation` (cache 15 s), `GET /api/journal`, et l'administration (`GET/POST /api/admin/votes`, `PATCH /api/admin/votes/:id`, `POST /api/admin/votes/:id/publish`, `POST /api/admin/votes/:id/cancel` avec suppression des bulletins et journalisation publique).
+- Construit les pages conformes §9/§10 : `/votes` (Ouverts · Bientôt · Clos, carré 8 px, barre 2 px sans quorum, sans filtre campus), `/votes/[slug]` (arguments Pour/Contre inversés, faits concrets, règles du vote et empreinte de clé en mono), `/admin` (création/édition brouillon, publication, annulation motivée) et `/journal`.
+- Livré les tests J2 (`aead-and-vote-keys.test.ts`, `vote-rules.test.ts`, `votes-lifecycle.test.ts`). `pnpm lint`, `pnpm typecheck`, `pnpm test` (11 fichiers / 41 tests) et `pnpm build` verts.
+Reste :
+- **J3 — Vote anonyme** : §6.1 à §6.4 (`@cloudflare/blindrsa-ts` + vecteurs RFC 9474, `POST /api/votes/:slug/token`, `POST /api/ballots` sans cookie ni auth, IndexedDB, Bulletin, Confirmation, A voté, Mes reçus, tests d'invariants et Playwright E2E).
+Bloquant / question pour Junior :
+- Aucun.
