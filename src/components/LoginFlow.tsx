@@ -26,6 +26,7 @@ export function LoginFlow() {
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [devCode, setDevCode] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resendSeconds, setResendSeconds] = useState(0);
 
@@ -64,6 +65,7 @@ export function LoginFlow() {
 
       const payload = (await response.json().catch(() => null)) as {
         error?: string;
+        devCode?: string;
       } | null;
 
       if (!response.ok) {
@@ -72,6 +74,11 @@ export function LoginFlow() {
       }
 
       setDigits(Array.from({ length: CODE_LENGTH }, () => ""));
+      setDevCode(
+        typeof payload?.devCode === "string" && /^\d{6}$/.test(payload.devCode)
+          ? payload.devCode
+          : null,
+      );
       setResendSeconds(RESEND_DELAY_SECONDS);
       setStep("code");
       if (isResend) {
@@ -406,6 +413,24 @@ export function LoginFlow() {
                 ))}
               </div>
             </fieldset>
+
+            {devCode && (
+              <div
+                role="status"
+                className="flex items-center justify-between border border-ink p-3"
+              >
+                <span className="text-mono-xs text-ink">
+                  {copy.auth.devCodeNotice(devCode)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => applyPastedDigits(devCode, 0)}
+                  className="inline-flex min-h-[48px] cursor-pointer items-center pl-3 text-meta font-medium text-ink underline underline-offset-4"
+                >
+                  {copy.auth.devCodeFill}
+                </button>
+              </div>
+            )}
 
             {statusMessage && (
               <p role="status" className="text-meta text-ink-2">

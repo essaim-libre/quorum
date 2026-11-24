@@ -42,7 +42,10 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    return NextResponse.json({ ok: true }, { status: 200 });
+    return NextResponse.json(
+      result.devCode ? { ok: true, devCode: result.devCode } : { ok: true },
+      { status: 200 },
+    );
   } catch (error: unknown) {
     const code = error instanceof Error ? error.message : "unknown";
     log("error", "auth.code.failed", { reason: code });

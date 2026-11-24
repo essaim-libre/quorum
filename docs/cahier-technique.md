@@ -676,7 +676,7 @@ Chaque jalon est terminé quand lint, typecheck et tests sont verts et que `docs
 - [x] **J0 — Socle** : dépôt, Next.js, Tailwind, tokens du §10, polices, Drizzle, migrations §7 avec triggers, `docker compose`, validation de la configuration, CI.
 - [x] **J1 — Connexion** : §5 complet, écrans email et code, sessions, rate limiting, `MAIL_DRIVER=console`.
 - [x] **J2 — Votes en lecture et administration** : création, brouillon, publication avec génération de clé, annulation, journal public. Pages Votes et Question.
-- [ ] **J3 — Vote anonyme** : §6.1 à §6.4, wrapper crypto avec vecteurs RFC, IndexedDB, Bulletin, Confirmation, A voté, Mes reçus. Tests d'invariants.
+- [x] **J3 — Vote anonyme** : §6.1 à §6.4, wrapper crypto avec vecteurs RFC, IndexedDB, Bulletin, Confirmation, A voté, Mes reçus. Tests d'invariants.
 - [ ] **J4 — Clôture et résultats** : §6.5 et §6.6, page Résultats, liste des reçus, procès-verbal PDF, cron.
 - [ ] **J5 — Pétitions** : §3 complet, Proposer, Signatures, « Contre », relecture, publication automatique.
 - [ ] **J6 — Mode amphi, « Comment ça marche », journal, page données personnelles.**

@@ -32,6 +32,9 @@ export const copy = {
     resendAction: "Renvoyer un code",
     resendSuccess: "Un nouveau code vient d’être envoyé si l’adresse est valide.",
     changeEmailAction: "Changer d’adresse",
+    devCodeNotice: (code: string) =>
+      `Mode dev local (MAIL_DRIVER=console) — code : ${code}`,
+    devCodeFill: "Remplir",
     logoutAction: "Se déconnecter",
     logoutPending: "Déconnexion…",
   },
@@ -159,10 +162,42 @@ export const copy = {
     adminRoleNote: "Accès administration actif sur cette session.",
     adminLink: "Ouvrir l’administration",
     receiptsTitle: "Mes reçus",
-    receiptsEmpty:
-      "Tes reçus de vote s’afficheront ici dès que tu auras participé à un scrutin (J3).",
+    receiptCodeLabel: "Reçu de vérification (ton choix n’est jamais stocké)",
+    receiptsEmpty: "Aucun reçu enregistré sur cet appareil pour le moment.",
     howItWorksLink: "Comment ça marche",
     journalLink: "Journal d’administration",
+  },
+  ballot: {
+    backToQuestion: "Retour à la question",
+    stepChoose: "Bulletin · Choix",
+    stepConfirm: "Bulletin · Confirmation",
+    preparingToken: "Préparation de ton jeton anonyme…",
+    chooseHint: "Choisis une option. Tu pourras modifier ton vote jusqu’à l’échéance.",
+    revoteHint:
+      "Nouveau vote : ton choix précédent n’est jamais conservé sur ton appareil. Seul ton dernier bulletin comptera.",
+    continueCta: "Continuer",
+    selectedLabel: "Ton choix",
+    confirmPrivacyNote:
+      "Ton bulletin est envoyé sans cookie ni identifiant. Ton choix n’est jamais enregistré sur cet appareil.",
+    confirmCta: "Confirmer mon vote",
+    submittingCta: "Envoi anonyme…",
+    changeChoice: "Modifier mon choix",
+    loginLink: "Me connecter",
+    tokenLostTitle: "Jeton déjà émis sur un autre appareil",
+    tokenLostBody:
+      "Un jeton anonyme a déjà été émis pour ton compte sur ce scrutin, mais il n’est plus présent dans ce navigateur. Pour empêcher tout double vote, un second jeton ne peut pas être délivré.",
+  },
+  voted: {
+    heading: "A voté.",
+    receiptLabel: "Ton reçu",
+    copyReceipt: "Copier",
+    copied: "Copié",
+    receiptUnavailable:
+      "Reçu introuvable sur cet appareil. Il est conservé uniquement dans le navigateur utilisé pour voter.",
+    receiptExplanation:
+      "À la clôture, la liste publique des reçus (sans les choix) te permettra de vérifier que ton bulletin a bien été compté, sans que personne ne puisse connaître ton vote.",
+    closesAtNotice: (date: string) => `Résultats publics à l’échéance : ${date}`,
+    revoteLink: "Modifier mon vote",
   },
   howItWorks: {
     title: "Comment l’anonymat est garanti",
@@ -190,6 +225,15 @@ export const copy = {
       "Le scrutin doit contenir entre 2 et 4 options, plus le vote blanc.",
     vote_not_cancellable: "Ce scrutin ne peut pas être annulé dans son état actuel.",
     vote_already_closed: "Un scrutin clos ne peut plus être annulé.",
+    vote_closed: "Ce scrutin n’est plus ouvert au vote.",
+    invalid_blinded_msg: "Requête de jeton invalide.",
+    token_already_issued:
+      "Un jeton a déjà été délivré pour ce scrutin sur un autre appareil.",
+    invalid_token: "Jeton de vote invalide pour ce scrutin.",
+    invalid_signature: "Signature du jeton invalide.",
+    invalid_option: "L’option choisie n’appartient pas à ce scrutin.",
+    max_revisions_reached:
+      "Tu as atteint la limite de 20 modifications pour ce scrutin.",
     network_error:
       "Impossible de joindre le serveur. Vérifie ta connexion et réessaie.",
   },

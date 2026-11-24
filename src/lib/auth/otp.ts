@@ -22,7 +22,7 @@ export const OTP_TTL_MS = 10 * 60 * 1000;
 export const OTP_MAX_ATTEMPTS = 5;
 
 export type RequestOtpResult =
-  | { readonly ok: true }
+  | { readonly ok: true; readonly devCode?: string }
   | { readonly ok: false; readonly error: "invalid_email" }
   | {
       readonly ok: false;
@@ -90,7 +90,9 @@ export async function requestOtpCode(params: {
   await driver.sendOtpCode({ to: normalizedEmail, code });
 
   log("info", "auth.code.sent");
-  return { ok: true };
+  const isLocalConsoleDev =
+    env.NODE_ENV === "development" && env.MAIL_DRIVER === "console";
+  return isLocalConsoleDev ? { ok: true, devCode: code } : { ok: true };
 }
 
 export async function verifyOtpCode(params: {

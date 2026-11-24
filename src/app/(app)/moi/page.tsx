@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/LogoutButton";
+import { MyReceiptsList } from "@/components/MyReceiptsList";
 import { copy } from "@/copy/fr";
 import { getCurrentSession } from "@/lib/auth/session";
 
@@ -41,7 +42,7 @@ export default async function MePage() {
         <h2 className="text-heading font-bold text-ink">
           {copy.me.receiptsTitle}
         </h2>
-        <p className="text-body mt-3 text-ink-2">{copy.me.receiptsEmpty}</p>
+        <MyReceiptsList />
       </section>
 
       <section className="quorum-rule flex flex-col items-start gap-1 pt-6">

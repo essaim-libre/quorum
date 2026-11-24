@@ -54,3 +54,21 @@ Reste :
 - **J3 — Vote anonyme** : §6.1 à §6.4 (`@cloudflare/blindrsa-ts` + vecteurs RFC 9474, `POST /api/votes/:slug/token`, `POST /api/ballots` sans cookie ni auth, IndexedDB, Bulletin, Confirmation, A voté, Mes reçus, tests d'invariants et Playwright E2E).
 Bloquant / question pour Junior :
 - Aucun.
+
+## 2026-11-24 23:17 — Antigravity — J3
+Fait :
+- Ajouté l'affichage local du code OTP (`devCode`) uniquement lorsque `NODE_ENV === "development"` et `MAIL_DRIVER === "console"`, pour permettre les tests locaux dans le navigateur sans serveur SMTP (documenté dans `docs/decisions.md`, strictement inactif en production et en test).
+- Implémenté le protocole de vote anonyme §6.1 à §6.4 :
+  - `src/lib/crypto/blind.ts` : wrapper `@cloudflare/blindrsa-ts` (`RSABSSA-SHA384-PSS-Randomized`, RFC 9474) + construction/vérification du préfixe `quorum/v1/{voteId}/`.
+  - `src/lib/crypto/base64url.ts` : encodage/décodage base64url isomorphe navigateur/Node sans dépendre du polyfill `Buffer`.
+  - `src/lib/crypto/receipt.ts` : calcul du reçu Crockford Base32 des 45 premiers bits de `SHA-256("quorum-receipt" ‖ input_msg)` au format `XX-XXXX-XXX`.
+  - Phase 1 : `src/lib/votes/token.ts` et `POST /api/votes/[slug]/token` (session obligatoire, rate limit 10/min, `emargement` transactionnel avec rejeu idempotent et `409 token_already_issued` sur demande différente).
+  - Phase 2 : `src/lib/votes/ballot.ts` et `POST /api/ballots` (invariant n°4 respecté et vérifié par ESLint + tests : aucun cookie, aucune session, aucun import auth/`next/headers`, rate limit 600/min/IP, revote jusqu'à 20 révisions).
+- Créé le stockage client IndexedDB `src/lib/client/token-store.ts` (invariant n°10 : aucun choix stocké) et `src/lib/client/voting-client.ts` (délai aléatoire 0,5 à 3 s + `credentials: "omit"`).
+- Construit les écrans §9/§10 : préchargement du jeton dès l'ouverture de `/votes/[slug]` (`TokenPrefetcher`), `/votes/[slug]/bulletin` (choix sans présélection + confirmation), `/votes/[slug]/a-vote` (« A voté. » + reçu copiable, sans quorum), et « Mes reçus » dans `/moi` (`MyReceiptsList`).
+- Livré les tests unitaires avec le vecteur officiel RFC 9474 annexe A.1 (`tests/unit/blind-crypto.test.ts`), les tests d'invariants (`tests/invariants/anonymous-voting.test.ts`) et le test Playwright E2E complet (`tests/e2e/voting-flow.spec.ts`).
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` (13 fichiers / 47 tests), `pnpm test:e2e` (Chromium) et `pnpm build` verts.
+Reste :
+- **J4 — Clôture et résultats** : §6.5 et §6.6, clôture idempotente (`results`, `tokens_issued`, suppression `emargement`, effacement `private_key_enc`, `VACUUM`), dépouillement (`tally.ts`), page Résultats, liste des reçus (`/api/votes/:slug/receipts`), procès-verbal PDF (`/api/votes/:slug/pv.pdf`) et cron (`/api/internal/cron`).
+Bloquant / question pour Junior :
+- Aucun.

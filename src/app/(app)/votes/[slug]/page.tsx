@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArgumentsTabs } from "@/components/ArgumentsTabs";
 import { ParticipationBar } from "@/components/ParticipationBar";
+import { TokenPrefetcher } from "@/components/TokenPrefetcher";
 import { VoteStatusIndicator } from "@/components/VoteStatusIndicator";
 import { copy } from "@/copy/fr";
+import { getCurrentSession } from "@/lib/auth/session";
 import {
   formatDateTimeParis,
   formatDurationRemaining,
@@ -19,7 +21,10 @@ export default async function VoteDetailPage({
   readonly params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const result = await getPublishedVoteBySlug(getDb(), slug);
+  const [result, session] = await Promise.all([
+    getPublishedVoteBySlug(getDb(), slug),
+    getCurrentSession(),
+  ]);
   if (!result) {
     notFound();
   }
@@ -38,6 +43,13 @@ export default async function VoteDetailPage({
 
   return (
     <main className="quorum-container py-6">
+      <TokenPrefetcher
+        voteId={vote.id}
+        slug={vote.slug}
+        question={vote.question}
+        publicKeySpkiBase64={vote.publicKeySpkiBase64}
+        enabled={vote.status === "open" && session !== null}
+      />
       <div className="border-b border-rule pb-2">
         <Link
           href="/votes"

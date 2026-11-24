@@ -52,3 +52,42 @@ Ajout de la dépendance runtime `lru-cache`.
 
 **Conséquence**
 Permet un rate limiting borné en mémoire (sans fuite de mémoire ni persistance d'IP) sur `/api/auth/code`, `/api/votes/:slug/token` et `/api/ballots`.
+
+---
+
+## 2026-11-24 — Aide de test local en mode `MAIL_DRIVER=console`
+
+**Contexte**
+En développement local, sans serveur SMTP configuré, le code OTP est affiché uniquement sur la sortie standard du serveur Next.js (`MAIL_DRIVER=console`), qui n'est pas toujours visible lorsqu'on teste depuis le navigateur.
+
+**Décision**
+Lorsque `NODE_ENV === "development"` **et** `MAIL_DRIVER === "console"`, `POST /api/auth/code` inclut le champ `devCode` dans la réponse JSON et l'écran de saisie du code l'affiche dans un encart monochrome « Mode dev local ». En `test` et en `production` (où `MAIL_DRIVER=console` est de toute façon interdit au démarrage), `devCode` n'est jamais renvoyé.
+
+**Conséquence**
+Test complet du flux d'authentification en local sans serveur de messagerie, sans impact sur la sécurité en production ni sur l'invariant n°1 (aucun email n'est jamais exposé ni journalisé).
+
+---
+
+## 2026-11-24 — Jalon J3 : ajout de `@cloudflare/blindrsa-ts`
+
+**Contexte**
+Le cahier (§6) et `AGENTS.md` (invariant n°11) imposent `@cloudflare/blindrsa-ts` (RFC 9474, variante `RSABSSA-SHA384-PSS-Randomized`) pour les signatures aveugles.
+
+**Décision**
+Ajout de la dépendance runtime `@cloudflare/blindrsa-ts` (v0.4.6).
+
+**Conséquence**
+Primitives RFC 9474 standardisées, utilisables côté client (WebCrypto) et côté serveur (Node WebCrypto), sans réimplémentation cryptographique.
+
+---
+
+## 2026-11-24 — Jalon J3 : ajout de `@playwright/test`
+
+**Contexte**
+`AGENTS.md` et le cahier (§13, §14) exigent une suite de tests de bout en bout Playwright (`pnpm test:e2e`) verte à partir du jalon J3.
+
+**Décision**
+Ajout de `@playwright/test` en dépendance de développement et ajout du script `test:e2e`.
+
+**Conséquence**
+Vérification de bout en bout du parcours étudiant réel dans un navigateur (IndexedDB, `credentials: "omit"` sur `/api/ballots`, vote, revote, « A voté », « Mes reçus »).
