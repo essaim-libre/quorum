@@ -1,0 +1,1089 @@
+{
+  "id": "9770806d-481a-4b91-9b2e-271d8d6baec1",
+  "prevId": "5584be5f-9e9d-45f8-9432-f1dc019ffbd0",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.admin_journal": {
+      "name": "admin_journal",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigserial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "at": {
+          "name": "at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "action": {
+          "name": "action",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_type": {
+          "name": "target_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "target_id": {
+          "name": "target_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ballots": {
+      "name": "ballots",
+      "schema": "",
+      "columns": {
+        "vote_id": {
+          "name": "vote_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "option_id": {
+          "name": "option_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "revision": {
+          "name": "revision",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ballots_vote_id_votes_id_fk": {
+          "name": "ballots_vote_id_votes_id_fk",
+          "tableFrom": "ballots",
+          "tableTo": "votes",
+          "columnsFrom": [
+            "vote_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "ballots_option_id_vote_options_id_fk": {
+          "name": "ballots_option_id_vote_options_id_fk",
+          "tableFrom": "ballots",
+          "tableTo": "vote_options",
+          "columnsFrom": [
+            "option_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "ballots_vote_id_token_hash_pk": {
+          "name": "ballots_vote_id_token_hash_pk",
+          "columns": [
+            "vote_id",
+            "token_hash"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "ballots_revision_chk": {
+          "name": "ballots_revision_chk",
+          "value": "\"ballots\".\"revision\" BETWEEN 1 AND 20"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.contre_proposals": {
+      "name": "contre_proposals",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "petition_id": {
+          "name": "petition_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "text": {
+          "name": "text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "author_label": {
+          "name": "author_label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "author_tag": {
+          "name": "author_tag",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "supports": {
+          "name": "supports",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "contre_proposals_petition_id_petitions_id_fk": {
+          "name": "contre_proposals_petition_id_petitions_id_fk",
+          "tableFrom": "contre_proposals",
+          "tableTo": "petitions",
+          "columnsFrom": [
+            "petition_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "contre_proposals_text_len_chk": {
+          "name": "contre_proposals_text_len_chk",
+          "value": "char_length(\"contre_proposals\".\"text\") <= 600"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.contre_supports": {
+      "name": "contre_supports",
+      "schema": "",
+      "columns": {
+        "petition_id": {
+          "name": "petition_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "supporter_tag": {
+          "name": "supporter_tag",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "proposal_id": {
+          "name": "proposal_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "contre_supports_petition_id_petitions_id_fk": {
+          "name": "contre_supports_petition_id_petitions_id_fk",
+          "tableFrom": "contre_supports",
+          "tableTo": "petitions",
+          "columnsFrom": [
+            "petition_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "contre_supports_proposal_id_contre_proposals_id_fk": {
+          "name": "contre_supports_proposal_id_contre_proposals_id_fk",
+          "tableFrom": "contre_supports",
+          "tableTo": "contre_proposals",
+          "columnsFrom": [
+            "proposal_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "contre_supports_petition_id_supporter_tag_pk": {
+          "name": "contre_supports_petition_id_supporter_tag_pk",
+          "columns": [
+            "petition_id",
+            "supporter_tag"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.emargement": {
+      "name": "emargement",
+      "schema": "",
+      "columns": {
+        "vote_id": {
+          "name": "vote_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "voter_tag": {
+          "name": "voter_tag",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "blinded_hash": {
+          "name": "blinded_hash",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "blind_sig": {
+          "name": "blind_sig",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "emargement_vote_id_votes_id_fk": {
+          "name": "emargement_vote_id_votes_id_fk",
+          "tableFrom": "emargement",
+          "tableTo": "votes",
+          "columnsFrom": [
+            "vote_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "emargement_vote_id_voter_tag_pk": {
+          "name": "emargement_vote_id_voter_tag_pk",
+          "columns": [
+            "vote_id",
+            "voter_tag"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.otp_codes": {
+      "name": "otp_codes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "voter_id": {
+          "name": "voter_id",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code_hash": {
+          "name": "code_hash",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attempts": {
+          "name": "attempts",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "consumed": {
+          "name": "consumed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "otp_codes_voter_id_idx": {
+          "name": "otp_codes_voter_id_idx",
+          "columns": [
+            {
+              "expression": "voter_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.petition_signatures": {
+      "name": "petition_signatures",
+      "schema": "",
+      "columns": {
+        "petition_id": {
+          "name": "petition_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "signer_tag": {
+          "name": "signer_tag",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "petition_signatures_petition_id_petitions_id_fk": {
+          "name": "petition_signatures_petition_id_petitions_id_fk",
+          "tableFrom": "petition_signatures",
+          "tableTo": "petitions",
+          "columnsFrom": [
+            "petition_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "petition_signatures_petition_id_signer_tag_pk": {
+          "name": "petition_signatures_petition_id_signer_tag_pk",
+          "columns": [
+            "petition_id",
+            "signer_tag"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.petitions": {
+      "name": "petitions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "author_tag": {
+          "name": "author_tag",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "question": {
+          "name": "question",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "options": {
+          "name": "options",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "argument_pour": {
+          "name": "argument_pour",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "argument_pour_author": {
+          "name": "argument_pour_author",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_ag_decision": {
+          "name": "is_ag_decision",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "origin_detail": {
+          "name": "origin_detail",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "requested_duration": {
+          "name": "requested_duration",
+          "type": "interval",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "interval '72 hours'"
+        },
+        "state": {
+          "name": "state",
+          "type": "petition_state",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'collecting'"
+        },
+        "collect_until": {
+          "name": "collect_until",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "threshold": {
+          "name": "threshold",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "signatures_count": {
+          "name": "signatures_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "review_deadline": {
+          "name": "review_deadline",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "proposed_rewording": {
+          "name": "proposed_rewording",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "decision_reason": {
+          "name": "decision_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vote_id": {
+          "name": "vote_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_on": {
+          "name": "created_on",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_date"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "petitions_vote_id_votes_id_fk": {
+          "name": "petitions_vote_id_votes_id_fk",
+          "tableFrom": "petitions",
+          "tableTo": "votes",
+          "columnsFrom": [
+            "vote_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "petitions_slug_unique": {
+          "name": "petitions_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "petitions_question_len_chk": {
+          "name": "petitions_question_len_chk",
+          "value": "char_length(\"petitions\".\"question\") <= 140"
+        },
+        "petitions_argument_pour_len_chk": {
+          "name": "petitions_argument_pour_len_chk",
+          "value": "char_length(\"petitions\".\"argument_pour\") <= 600"
+        },
+        "petitions_requested_duration_chk": {
+          "name": "petitions_requested_duration_chk",
+          "value": "\"petitions\".\"requested_duration\" BETWEEN interval '24 hours' AND interval '14 days'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.results": {
+      "name": "results",
+      "schema": "",
+      "columns": {
+        "vote_id": {
+          "name": "vote_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "option_id": {
+          "name": "option_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "count": {
+          "name": "count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "results_vote_id_votes_id_fk": {
+          "name": "results_vote_id_votes_id_fk",
+          "tableFrom": "results",
+          "tableTo": "votes",
+          "columnsFrom": [
+            "vote_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "results_option_id_vote_options_id_fk": {
+          "name": "results_option_id_vote_options_id_fk",
+          "tableFrom": "results",
+          "tableTo": "vote_options",
+          "columnsFrom": [
+            "option_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "results_vote_id_option_id_pk": {
+          "name": "results_vote_id_option_id_pk",
+          "columns": [
+            "vote_id",
+            "option_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sessions": {
+      "name": "sessions",
+      "schema": "",
+      "columns": {
+        "token_hash": {
+          "name": "token_hash",
+          "type": "bytea",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "voter_id": {
+          "name": "voter_id",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_admin": {
+          "name": "is_admin",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "sessions_voter_id_voters_id_fk": {
+          "name": "sessions_voter_id_voters_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "voters",
+          "columnsFrom": [
+            "voter_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.vote_options": {
+      "name": "vote_options",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "vote_id": {
+          "name": "vote_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_blank": {
+          "name": "is_blank",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "vote_options_vote_id_votes_id_fk": {
+          "name": "vote_options_vote_id_votes_id_fk",
+          "tableFrom": "vote_options",
+          "tableTo": "votes",
+          "columnsFrom": [
+            "vote_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "vote_options_vote_id_position_uniq": {
+          "name": "vote_options_vote_id_position_uniq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "vote_id",
+            "position"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "vote_options_label_len_chk": {
+          "name": "vote_options_label_len_chk",
+          "value": "char_length(\"vote_options\".\"label\") <= 80"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.vote_receipts": {
+      "name": "vote_receipts",
+      "schema": "",
+      "columns": {
+        "vote_id": {
+          "name": "vote_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "receipt": {
+          "name": "receipt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "vote_receipts_vote_id_votes_id_fk": {
+          "name": "vote_receipts_vote_id_votes_id_fk",
+          "tableFrom": "vote_receipts",
+          "tableTo": "votes",
+          "columnsFrom": [
+            "vote_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "vote_receipts_vote_id_receipt_pk": {
+          "name": "vote_receipts_vote_id_receipt_pk",
+          "columns": [
+            "vote_id",
+            "receipt"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.voters": {
+      "name": "voters",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bytea",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "created_on": {
+          "name": "created_on",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_date"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.votes": {
+      "name": "votes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "question": {
+          "name": "question",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "origin": {
+          "name": "origin",
+          "type": "vote_origin",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "origin_detail": {
+          "name": "origin_detail",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "petition_id": {
+          "name": "petition_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status_note": {
+          "name": "status_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "argument_pour": {
+          "name": "argument_pour",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "argument_pour_author": {
+          "name": "argument_pour_author",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "argument_contre": {
+          "name": "argument_contre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "argument_contre_author": {
+          "name": "argument_contre_author",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "facts": {
+          "name": "facts",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "state": {
+          "name": "state",
+          "type": "vote_state",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "opens_at": {
+          "name": "opens_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "closes_at": {
+          "name": "closes_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "public_key_spki": {
+          "name": "public_key_spki",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "private_key_enc": {
+          "name": "private_key_enc",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "key_fingerprint": {
+          "name": "key_fingerprint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tokens_issued": {
+          "name": "tokens_issued",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancel_reason": {
+          "name": "cancel_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "votes_slug_unique": {
+          "name": "votes_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "votes_question_len_chk": {
+          "name": "votes_question_len_chk",
+          "value": "char_length(\"votes\".\"question\") <= 140"
+        },
+        "votes_argument_pour_len_chk": {
+          "name": "votes_argument_pour_len_chk",
+          "value": "char_length(\"votes\".\"argument_pour\") <= 600"
+        },
+        "votes_argument_contre_len_chk": {
+          "name": "votes_argument_contre_len_chk",
+          "value": "\"votes\".\"argument_contre\" IS NULL OR char_length(\"votes\".\"argument_contre\") <= 600"
+        },
+        "votes_duration_chk": {
+          "name": "votes_duration_chk",
+          "value": "\"votes\".\"closes_at\" - \"votes\".\"opens_at\" BETWEEN interval '24 hours' AND interval '14 days'"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.petition_state": {
+      "name": "petition_state",
+      "schema": "public",
+      "values": [
+        "collecting",
+        "in_review",
+        "changes_requested",
+        "approved",
+        "rejected",
+        "expired"
+      ]
+    },
+    "public.vote_origin": {
+      "name": "vote_origin",
+      "schema": "public",
+      "values": [
+        "admin",
+        "petition"
+      ]
+    },
+    "public.vote_state": {
+      "name": "vote_state",
+      "schema": "public",
+      "values": [
+        "draft",
+        "published",
+        "cancelled"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

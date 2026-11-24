@@ -199,6 +199,47 @@ export const copy = {
     closesAtNotice: (date: string) => `Résultats publics à l’échéance : ${date}`,
     revoteLink: "Modifier mon vote",
   },
+  results: {
+    pageLabel: "Résultats",
+    deadlineLabel: (date: string) => `Échéance : ${date}`,
+    participationOf: "de participation",
+    winnerSummary: (label: string, pct: string) =>
+      `${label} l’emporte avec ${pct} des suffrages exprimés.`,
+    expressedTotal: (count: string) =>
+      `${count} suffrages exprimés (hors votes blancs)`,
+    votesCount: (count: string) =>
+      count === "1" ? `${count} voix` : `${count} voix`,
+    blankLabel: "Vote blanc (compté à part)",
+    blankCount: (count: string) =>
+      count === "1" ? `${count} bulletin` : `${count} bulletins`,
+    integritySection: "Contrôle public et vérification",
+    ballotsAndTokens: (ballots: string, tokens: string) =>
+      `Bulletins : ${ballots} · Jetons émis : ${tokens}`,
+    integrityOk: "Contrôle conforme : bulletins inférieurs ou égaux aux jetons émis.",
+    integrityAlert: "Anomalie détectée : le nombre de bulletins dépasse les jetons émis.",
+    keyFingerprintLabel: "Empreinte de la clé du scrutin (SHA-256)",
+    receiptsHashLabel: "Empreinte de la liste des reçus (SHA-256)",
+    receiptsListLink: "Liste des reçus",
+    downloadPvLink: "Télécharger le procès-verbal (PDF)",
+    backToQuestionLink: "Relire la question et les arguments",
+    statusPrefix: "Statut :",
+  },
+  receipts: {
+    title: "Liste publique des reçus",
+    backToResults: "Retour aux résultats",
+    intro:
+      "Chaque reçu correspond à un bulletin compté dans l’urne, trié par ordre alphabétique sans aucun lien avec les choix.",
+    searchLabel: "Vérifier un reçu (format XX-XXXX-XXX)",
+    searchPlaceholder: "Ex. 7K-M4P2-9X1",
+    myReceiptFound: (receipt: string) =>
+      `Ton reçu (${receipt}) figure bien dans la liste publique des bulletins comptés.`,
+    myReceiptMissing: (receipt: string) =>
+      `Ton reçu (${receipt}) n’apparaît pas dans la liste publique.`,
+    emptyList: "Aucun bulletin n’a été déposé pour ce scrutin.",
+    noMatch: "Aucun reçu ne correspond à cette recherche.",
+    countLabel: (count: number) =>
+      count <= 1 ? `${count} reçu` : `${count} reçus`,
+  },
   howItWorks: {
     title: "Comment l’anonymat est garanti",
     intro:
@@ -226,6 +267,7 @@ export const copy = {
     vote_not_cancellable: "Ce scrutin ne peut pas être annulé dans son état actuel.",
     vote_already_closed: "Un scrutin clos ne peut plus être annulé.",
     vote_closed: "Ce scrutin n’est plus ouvert au vote.",
+    vote_not_closed: "Les résultats ne sont disponibles qu’après l’échéance du scrutin.",
     invalid_blinded_msg: "Requête de jeton invalide.",
     token_already_issued:
       "Un jeton a déjà été délivré pour ce scrutin sur un autre appareil.",

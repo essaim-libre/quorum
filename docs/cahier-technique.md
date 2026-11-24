@@ -364,6 +364,13 @@ create table results (
   primary key (vote_id, option_id)
 );
 
+-- Reçus publics (sans lien avec option_id ni identité, publiés triés après clôture)
+create table vote_receipts (
+  vote_id    uuid not null references votes(id),
+  receipt    text not null,
+  primary key (vote_id, receipt)
+);
+
 -- Pétitions
 create type petition_state as enum
   ('collecting', 'in_review', 'changes_requested', 'approved', 'rejected', 'expired');
@@ -677,7 +684,7 @@ Chaque jalon est terminé quand lint, typecheck et tests sont verts et que `docs
 - [x] **J1 — Connexion** : §5 complet, écrans email et code, sessions, rate limiting, `MAIL_DRIVER=console`.
 - [x] **J2 — Votes en lecture et administration** : création, brouillon, publication avec génération de clé, annulation, journal public. Pages Votes et Question.
 - [x] **J3 — Vote anonyme** : §6.1 à §6.4, wrapper crypto avec vecteurs RFC, IndexedDB, Bulletin, Confirmation, A voté, Mes reçus. Tests d'invariants.
-- [ ] **J4 — Clôture et résultats** : §6.5 et §6.6, page Résultats, liste des reçus, procès-verbal PDF, cron.
+- [x] **J4 — Clôture et résultats** : §6.5 et §6.6, page Résultats, liste des reçus, procès-verbal PDF, cron.
 - [ ] **J5 — Pétitions** : §3 complet, Proposer, Signatures, « Contre », relecture, publication automatique.
 - [ ] **J6 — Mode amphi, « Comment ça marche », journal, page données personnelles.**
 - [ ] **J7 — Durcissement** : en-têtes, CSP, revue des logs, Playwright complet, test de charge (500 jetons et 500 bulletins en 2 minutes), déploiement Scaleway.

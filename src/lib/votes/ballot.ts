@@ -8,7 +8,7 @@ import {
 import { sha256 } from "@/lib/crypto/hmac";
 import { computeReceipt } from "@/lib/crypto/receipt";
 import type { Database } from "@/lib/db/client";
-import { ballots, voteOptions, votes } from "@/lib/db/schema";
+import { ballots, voteOptions, voteReceipts, votes } from "@/lib/db/schema";
 import { log } from "@/lib/log";
 
 const RSA_2048_BYTES = 256;
@@ -128,6 +128,11 @@ export async function submitAnonymousBallot(params: {
     }
 
     const receipt = await computeReceipt(params.inputMsg);
+    await tx
+      .insert(voteReceipts)
+      .values({ voteId: params.voteId, receipt })
+      .onConflictDoNothing();
+
     log("info", "ballot.recorded", { voteId: params.voteId, revision });
     return { ok: true, receipt, revision } as const;
   });

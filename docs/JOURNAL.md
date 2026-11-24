@@ -72,3 +72,18 @@ Reste :
 - **J4 — Clôture et résultats** : §6.5 et §6.6, clôture idempotente (`results`, `tokens_issued`, suppression `emargement`, effacement `private_key_enc`, `VACUUM`), dépouillement (`tally.ts`), page Résultats, liste des reçus (`/api/votes/:slug/receipts`), procès-verbal PDF (`/api/votes/:slug/pv.pdf`) et cron (`/api/internal/cron`).
 Bloquant / question pour Junior :
 - Aucun.
+
+## 2026-11-24 23:30 — Antigravity — J4
+Fait :
+- Ajouté la table `vote_receipts(vote_id, receipt)` (`drizzle/0002_vote_receipts.sql` + trigger `trg_vote_receipts_guard`), documentée dans `docs/decisions.md` et synchronisée dans `docs/cahier-technique.md` §7, afin de publier la liste triée des reçus sans modifier `ballots` (invariant n°3) ni relier un reçu à un `option_id`.
+- Implémenté le dépouillement pur §2.2 (`src/lib/votes/tally.ts` : pourcentages sur les suffrages exprimés, blancs à part, gagnant/égalité/aucun exprimé, contrôle `bulletins ≤ tokens_issued`, empreinte `SHA-256` de la liste triée des reçus).
+- Implémenté la clôture idempotente §6.5 (`src/lib/votes/close.ts` : verrou `FOR UPDATE`, insertion `results`, `tokens_issued = count(emargement)`, suppression de `emargement`, `private_key_enc = null`, puis `VACUUM emargement` hors transaction) et les purges quotidiennes (`otp_codes` > 24 h, sessions expirées).
+- Implémenté le générateur de procès-verbal PDF 1.4 autonome (`src/lib/votes/pv-pdf.ts`, zéro dépendance externe).
+- Créé les routes API §8 et §14 : `GET /api/votes/[slug]/receipts`, `GET /api/votes/[slug]/pv.pdf`, `POST /api/internal/cron` (protégé par `CRON_SECRET` en comparaison temps constant), et enrichi `GET /api/votes/[slug]` (résultats inclus uniquement si clos, invariant n°5).
+- Construit les pages conformes §9/§10 : `/votes/[slug]/resultats` (barres 24 px, blanc en `blank`, « Échéance : … », « Bulletins : … · Jetons émis : … », empreintes, PV PDF, sans quorum ni composante) et `/votes/[slug]/recus` (`ReceiptsDirectory` avec recherche client et vérification automatique du reçu IndexedDB).
+- Livré les tests J4 (`tests/unit/tally-and-pv.test.ts`, `tests/invariants/close-and-results.test.ts`, `tests/e2e/results-and-receipts.spec.ts` + helper `admin-session.ts`).
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` (15 fichiers / 54 tests), `pnpm test:e2e` (2 tests E2E Chromium) et `pnpm build` verts.
+Reste :
+- **J5 — Pétitions** : §3 complet, Proposer, Signatures, « Contre », relecture, publication automatique après 48 h.
+Bloquant / question pour Junior :
+- Aucun.

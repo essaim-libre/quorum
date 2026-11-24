@@ -1,0 +1,60 @@
+import { NextResponse } from "next/server";
+import { constantTimeEqual } from "@/lib/crypto/hmac";
+import { getDb, getPool } from "@/lib/db/client";
+import { getEnv } from "@/lib/env";
+import { log } from "@/lib/log";
+import { closeAllDueVotes, runScheduledPurges } from "@/lib/votes/close";
+
+function extractCronSecret(headers: Headers): string | null {
+  const authHeader = headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.slice("Bearer ".length).trim();
+  }
+  const custom = headers.get("x-cron-secret")?.trim();
+  return custom || null;
+}
+
+export async function POST(request: Request): Promise<NextResponse> {
+  const env = getEnv();
+  if (!env.CRON_SECRET) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  const provided = extractCronSecret(request.headers);
+  if (
+    !provided ||
+    !constantTimeEqual(
+      Buffer.from(provided, "utf8"),
+      Buffer.from(env.CRON_SECRET, "utf8"),
+    )
+  ) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const db = getDb();
+    const pool = getPool();
+    const { closedCount } = await closeAllDueVotes(db, pool);
+    const purges = await runScheduledPurges(db);
+
+    log("info", "cron.completed", {
+      closedCount,
+      purgedOtpCodes: purges.purgedOtpCodes,
+      purgedSessions: purges.purgedSessions,
+    });
+
+    return NextResponse.json(
+      {
+        ok: true,
+        closedVotes: closedCount,
+        purgedOtpCodes: purges.purgedOtpCodes,
+        purgedSessions: purges.purgedSessions,
+      },
+      { status: 200 },
+    );
+  } catch (error: unknown) {
+    const reason = error instanceof Error ? error.message : "unknown";
+    log("error", "cron.failed", { reason });
+    return NextResponse.json({ error: "internal_error" }, { status: 500 });
+  }
+}

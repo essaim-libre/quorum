@@ -3,7 +3,13 @@ import { randomBytes } from "node:crypto";
 import { and, asc, desc, eq, gt, inArray, lte, sql } from "drizzle-orm";
 import { generateVoteKeyPair } from "@/lib/crypto/vote-keys";
 import type { Database } from "@/lib/db/client";
-import { ballots, emargement, voteOptions, votes } from "@/lib/db/schema";
+import {
+  ballots,
+  emargement,
+  voteOptions,
+  voteReceipts,
+  votes,
+} from "@/lib/db/schema";
 import { getEnv } from "@/lib/env";
 import { recordAdminAction } from "@/lib/journal";
 import { log } from "@/lib/log";
@@ -699,6 +705,7 @@ export async function cancelPublishedVote(
 
     // §2.4 : les bulletins d'un vote annulé sont supprimés, et aucun résultat n'est publié.
     await tx.delete(ballots).where(eq(ballots.voteId, voteId));
+    await tx.delete(voteReceipts).where(eq(voteReceipts.voteId, voteId));
     await tx.delete(emargement).where(eq(emargement.voteId, voteId));
 
     await tx

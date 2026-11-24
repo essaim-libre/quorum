@@ -15,6 +15,13 @@
       "when": 1795554693249,
       "tag": "0001_triggers_and_pgcrypto",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795558927468,
+      "tag": "0002_vote_receipts",
+      "breakpoints": true
     }
   ]
 }

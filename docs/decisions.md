@@ -91,3 +91,18 @@ Ajout de `@playwright/test` en dépendance de développement et ajout du script 
 
 **Conséquence**
 Vérification de bout en bout du parcours étudiant réel dans un navigateur (IndexedDB, `credentials: "omit"` sur `/api/ballots`, vote, revote, « A voté », « Mes reçus »).
+
+---
+
+## 2026-11-24 — Jalon J4 : table `vote_receipts` pour la liste publique des reçus
+
+**Contexte**
+La table `ballots` ne stocke que `(vote_id, token_hash, option_id, revision)` avec `token_hash = SHA-256(input_msg)` (invariant n°3). Le reçu public défini au §6.4 vaut `Crockford32(SHA-256("quorum-receipt" ‖ input_msg)[0..45b])`, qui ne peut pas être recalculé après coup à partir de `token_hash` sans conserver `input_msg` ni exposer de lien vers `option_id`.
+
+**Décision**
+Ajout d'une table dédiée `vote_receipts(vote_id uuid, receipt text, primary key (vote_id, receipt))`, alimentée de manière idempotente lors de `POST /api/ballots`, protégée par un trigger identique à celui de `ballots` (vote publié et ouvert), purgée en cas d'annulation, et publiée triée uniquement après `closes_at`.
+
+**Conséquence**
+- La formule exacte du §6.4 et la structure stricte à 4 colonnes de `ballots` (invariant n°3) sont intégralement préservées.
+- Aucune ligne en base ne relie un reçu public à un choix (`option_id`) ni à une identité, ni à un horodatage.
+- `docs/cahier-technique.md` (§7) est mis à jour dans le même commit.

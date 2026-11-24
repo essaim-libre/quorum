@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { createAdminRequestContext } from "./helpers/admin-session";
 
 const RECEIPT_REGEX =
   /^[0-9A-HJKMNP-TV-Z]{2}-[0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{3}$/;
@@ -11,24 +12,8 @@ test.describe("parcours étudiant complet — connexion, vote anonyme, revote et
   }) => {
     const origin = baseURL ?? "http://localhost:3000";
 
-    // 1. Prépare un scrutin ouvert via le compte admin configuré en local (.env)
-    const adminContext = await browser.newContext({ baseURL: origin });
-    const adminEmail = "admin@etu.u-bordeaux.fr";
-
-    const adminCodeRes = await adminContext.request.post("/api/auth/code", {
-      data: { email: adminEmail },
-    });
-    expect(adminCodeRes.status()).toBe(200);
-    const adminCodeJson = (await adminCodeRes.json()) as {
-      ok: boolean;
-      devCode?: string;
-    };
-    expect(adminCodeJson.devCode).toMatch(/^\d{6}$/);
-
-    const adminVerifyRes = await adminContext.request.post("/api/auth/verify", {
-      data: { email: adminEmail, code: adminCodeJson.devCode },
-    });
-    expect(adminVerifyRes.status()).toBe(200);
+    // 1. Prépare un scrutin ouvert via une session admin E2E
+    const adminContext = await createAdminRequestContext(browser, origin);
 
     const uniqueSuffix = Date.now().toString(36);
     const question = `Maintenir l'ouverture de la BU samedi (${uniqueSuffix}) ?`;

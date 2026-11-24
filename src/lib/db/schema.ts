@@ -180,6 +180,18 @@ export const results = pgTable(
   (table) => [primaryKey({ columns: [table.voteId, table.optionId] })],
 );
 
+// Reçus publics (publiés triés à la clôture, sans aucun lien avec option_id ni identité)
+export const voteReceipts = pgTable(
+  "vote_receipts",
+  {
+    voteId: uuid("vote_id")
+      .notNull()
+      .references(() => votes.id),
+    receipt: text("receipt").notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.voteId, table.receipt] })],
+);
+
 // Pétitions
 export const petitions = pgTable(
   "petitions",
@@ -296,6 +308,7 @@ export const schema = {
   emargement,
   ballots,
   results,
+  voteReceipts,
   petitions,
   petitionSignatures,
   contreProposals,
