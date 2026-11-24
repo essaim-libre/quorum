@@ -39,3 +39,16 @@ Ajout de la variable `CRON_SECRET` dans `.env.example` et dans `src/lib/env.ts` 
 
 **Conséquence**
 Cohérence entre `.env.example`, la validation Zod au démarrage et le futur endpoint `/api/internal/cron` (J4).
+
+---
+
+## 2026-11-24 — Jalon J1 : ajout de `lru-cache`
+
+**Contexte**
+Le cahier (§11) prévoit un rate limiting en mémoire basé sur `lru-cache` pour l'instance unique en V1, avec clés IP dérivées par `HMAC(sel du jour, ip)` et durée de vie maximale de 15 minutes.
+
+**Décision**
+Ajout de la dépendance runtime `lru-cache`.
+
+**Conséquence**
+Permet un rate limiting borné en mémoire (sans fuite de mémoire ni persistance d'IP) sur `/api/auth/code`, `/api/votes/:slug/token` et `/api/ballots`.

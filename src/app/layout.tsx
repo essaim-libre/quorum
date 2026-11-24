@@ -19,7 +19,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: copy.app.name,
+  title: copy.app.title,
   description: copy.app.tagline,
 };
 

@@ -24,3 +24,21 @@ Reste :
 - Optionnel : exporter les maquettes HTML/PNG de Google Stitch dans `docs/design/` avant les écrans de J1/J2.
 Bloquant / question pour Junior :
 - Docker Desktop n'était pas démarré sur le poste lors de la vérification locale (`dockerDesktopLinuxEngine` indisponible), donc les migrations n'ont pas encore été jouées contre un PostgreSQL local (elles sont prêtes et vérifiées par la CI).
+
+## 2026-11-24 22:35 — Antigravity — J1
+Fait :
+- Démarré PostgreSQL 16 via `docker compose up -d db`, appliqué les migrations Drizzle (`0000_initial_schema` et `0001_triggers_and_pgcrypto`) et validé en base les 3 triggers d'immutabilité/urne ainsi que la structure stricte de `ballots` (`tests/invariants/db-triggers.test.ts`).
+- Exporté l'écran Stitch `01-connexion.html` dans `docs/design/` et appliqué tous les écarts §9/§10.
+- Implémenté le §5 complet :
+  - `src/lib/crypto/hmac.ts` (`HMAC-SHA256`, `SHA-256`, `timingSafeEqual`).
+  - `src/lib/auth/email.ts` (normalisation, domaine `etu.u-bordeaux.fr`, refus du `+`).
+  - `src/lib/ratelimit.ts` (`lru-cache`, sel IP quotidien en mémoire, 3/15 min et 10/jour par `voter_id`, 300/15 min par IP).
+  - `src/lib/mail/` (drivers `console` sans email dans les logs et `scaleway` texte brut sans lien ni pixel).
+  - `src/lib/auth/otp.ts`, `session.ts`, `admin.ts` (code 6 chiffres `randomInt`, TTL 10 min, 5 essais max, comparaison à temps constant, session 30 j en `SHA-256`, cookie `__Host-quorum_session` `HttpOnly; Secure; SameSite=Lax; Path=/`, détection `ADMIN_EMAILS`).
+  - Routes `POST /api/auth/code`, `POST /api/auth/verify`, `POST /api/auth/logout`.
+- Créé les écrans conformes §9/§10 : `/` (accueil « Recevoir un code », saisie email, saisie code à 6 cases avec collage et renvoi après 60 s), `/votes`, `/moi` (avec déconnexion), `/comment-ca-marche` et navigation basse texte seul.
+- Livré les tests J1 (`email-and-ratelimit.test.ts`, `auth-otp.test.ts`, `db-triggers.test.ts`). `pnpm lint`, `pnpm typecheck`, `pnpm test` (8 fichiers / 30 tests) et `pnpm build` verts.
+Reste :
+- **J2 — Votes en lecture et administration** : création, brouillon, publication avec génération de clé RSA 2048 chiffrée AES-256-GCM, annulation motivée, journal public, pages Votes et Question.
+Bloquant / question pour Junior :
+- Aucun.

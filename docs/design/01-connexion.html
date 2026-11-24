@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>quorum — 01 Connexion (référence Stitch)</title>
+  <!-- Référence visuelle exportée depuis Google Stitch (écran "Connexion — Style Suisse").
+       Écarts §9 appliqués dans l'application :
+       - bouton « Recevoir un code » (au lieu de « Se connecter avec mon compte université »)
+       - pas de sélecteur de langue FR/EN en V1
+       - ajout des écrans saisie de l'email et saisie du code (6 cases, renvoi après 60 s)
+       - mention « université » à la place de « campus » -->
+</head>
+<body class="bg-[#FFFFFF] text-[#0A0A0A] antialiased min-h-screen">
+  <main class="flex flex-col justify-between w-full max-w-lg mx-auto min-h-screen px-6 pt-safe pb-safe box-border">
+    <header class="flex items-baseline justify-between pt-6 border-b border-[#D9D9D9] pb-4">
+      <span class="text-xl font-bold tracking-tight lowercase text-[#0A0A0A]">quorum</span>
+    </header>
+    <div class="my-auto py-12">
+      <p class="text-[22px] leading-[28px] font-normal text-[#0A0A0A] tracking-[-0.01em]">
+        Les votes qui concernent ton campus. Une voix par étudiant inscrit, vote anonyme, résultats publics à la clôture.
+      </p>
+    </div>
+    <footer class="flex flex-col space-y-4 pb-6">
+      <button class="w-full h-[52px] bg-[#0A0A0A] text-[#FFFFFF] text-[15px] font-medium px-4 text-left flex items-center justify-start border-none cursor-pointer" type="button">
+        Se connecter avec mon compte université
+      </button>
+      <div class="pt-1">
+        <a class="text-xs text-[#5C5C5C] underline underline-offset-4" href="#anonymat">
+          Comment l'anonymat est garanti
+        </a>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>

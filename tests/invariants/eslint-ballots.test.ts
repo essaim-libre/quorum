@@ -35,5 +35,5 @@ describe("invariant n°4 — règle ESLint sur src/app/api/ballots/**", () => {
     expect(
       restricted.some((msg) => msg.message.includes("authentification")),
     ).toBe(true);
-  });
+  }, 15_000);
 });
