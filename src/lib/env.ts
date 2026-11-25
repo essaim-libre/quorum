@@ -118,6 +118,14 @@ const rawEnvSchema = z
       }
     }
 
+    if (env.MASTER_KEY.length !== 32) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["MASTER_KEY"],
+        message: "MASTER_KEY doit faire exactement 32 octets pour AES-256-GCM.",
+      });
+    }
+
     if (env.NODE_ENV === "production" && env.MAIL_DRIVER === "console") {
       ctx.addIssue({
         code: "custom",

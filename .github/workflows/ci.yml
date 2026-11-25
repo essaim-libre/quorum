@@ -27,11 +27,11 @@ jobs:
     env:
       DATABASE_URL: postgres://quorum:quorum@localhost:5432/quorum
       APP_URL: http://localhost:3000
-      K_ID: cXVvcnVtLWNpLWstaWQtMzItYnl0ZXMta2V5LTAwMDAwMQ==
-      K_EMARG: cXVvcnVtLWNpLWstZW1hcmctMzItYnl0ZXMta2V5LTAwMg==
-      K_SIG: cXVvcnVtLWNpLWstc2lnLTMyLWJ5dGVzLWtleS0wMDAwMw==
-      K_OTP: cXVvcnVtLWNpLWstb3RwLTMyLWJ5dGVzLWtleS0wMDAwNA==
-      MASTER_KEY: cXVvcnVtLWNpLW1hc3Rlci0zMi1ieXRlcy1rZXktMDAwNQ==
+      K_ID: cXVvcnVtLWNpLWstaWQtMzItYnl0ZXMta2V5LTAwMDE=
+      K_EMARG: cXVvcnVtLWNpLWVtYXJnLTMyLWJ5dGVzLWtleS0wMDI=
+      K_SIG: cXVvcnVtLWNpLWstc2lnLTMyLWJ5dGVzLWtleS0wMDM=
+      K_OTP: cXVvcnVtLWNpLWstb3RwLTMyLWJ5dGVzLWtleS0wMDQ=
+      MASTER_KEY: cXVvcnVtLWNpLW1zdHItMzItYnl0ZXMta2V5LTAwMDU=
       ALLOWED_EMAIL_DOMAIN: etu.u-bordeaux.fr
       ADMIN_EMAILS: test.admin@etu.u-bordeaux.fr
       ELECTORATE_SIZE: "56000"
