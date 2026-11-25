@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Schibsted_Grotesk } from "next/font/google";
+import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { copy } from "@/copy/fr";
 import "./globals.css";
@@ -23,11 +24,14 @@ export const metadata: Metadata = {
   description: copy.app.tagline,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
+  // Rendu dynamique requis pour que Next.js injecte le nonce CSP de src/proxy.ts sur chaque page (§11)
+  await connection();
+
   return (
     <html
       lang="fr"

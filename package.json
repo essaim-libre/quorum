@@ -12,6 +12,7 @@
     "test": "vitest run --configLoader native",
     "test:watch": "vitest --configLoader native",
     "test:e2e": "playwright test",
+    "test:load": "tsx --conditions=react-server scripts/load-test.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/lib/db/migrate.ts"
   },

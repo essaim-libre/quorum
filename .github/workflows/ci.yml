@@ -27,8 +27,19 @@ jobs:
     env:
       DATABASE_URL: postgres://quorum:quorum@localhost:5432/quorum
       APP_URL: http://localhost:3000
+      K_ID: cXVvcnVtLWNpLWstaWQtMzItYnl0ZXMta2V5LTAwMDAwMQ==
+      K_EMARG: cXVvcnVtLWNpLWstZW1hcmctMzItYnl0ZXMta2V5LTAwMg==
+      K_SIG: cXVvcnVtLWNpLWstc2lnLTMyLWJ5dGVzLWtleS0wMDAwMw==
+      K_OTP: cXVvcnVtLWNpLWstb3RwLTMyLWJ5dGVzLWtleS0wMDAwNA==
+      MASTER_KEY: cXVvcnVtLWNpLW1hc3Rlci0zMi1ieXRlcy1rZXktMDAwNQ==
+      ALLOWED_EMAIL_DOMAIN: etu.u-bordeaux.fr
+      ADMIN_EMAILS: test.admin@etu.u-bordeaux.fr
+      ELECTORATE_SIZE: "56000"
+      PETITION_THRESHOLD: "300"
+      PETITION_COLLECT_DAYS: "7"
       MAIL_DRIVER: console
       MAIL_FROM: Quorum <code@exemple.fr>
+      CRON_SECRET: quorum-ci-cron-secret-minimum-32-characters-0001
 
     steps:
       - name: Checkout
@@ -60,3 +71,9 @@ jobs:
 
       - name: Build Next.js
         run: pnpm build
+
+      - name: Installer Chromium (Playwright)
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Tests E2E Playwright
+        run: pnpm test:e2e

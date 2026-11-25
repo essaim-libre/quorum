@@ -1,6 +1,6 @@
 import "server-only";
 import { and, eq, sql } from "drizzle-orm";
-import { blindSignToken, importVotePrivateKey } from "@/lib/crypto/blind";
+import { blindSignInWorkerPool } from "@/lib/crypto/blind-sign-pool";
 import { constantTimeEqual, hmacSha256, sha256 } from "@/lib/crypto/hmac";
 import { decryptVotePrivateKeyPkcs8 } from "@/lib/crypto/vote-keys";
 import type { Database } from "@/lib/db/client";
@@ -93,8 +93,7 @@ export async function issueBlindToken(params: {
     );
     let blindSigBytes: Uint8Array;
     try {
-      const privateKey = await importVotePrivateKey(pkcs8);
-      blindSigBytes = await blindSignToken(privateKey, params.blindedMsg);
+      blindSigBytes = await blindSignInWorkerPool(pkcs8, params.blindedMsg);
     } finally {
       pkcs8.fill(0);
     }

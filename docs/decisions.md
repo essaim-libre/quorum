@@ -106,3 +106,22 @@ Ajout d'une table dédiée `vote_receipts(vote_id uuid, receipt text, primary ke
 - La formule exacte du §6.4 et la structure stricte à 4 colonnes de `ballots` (invariant n°3) sont intégralement préservées.
 - Aucune ligne en base ne relie un reçu public à un choix (`option_id`) ni à une identité, ni à un horodatage.
 - `docs/cahier-technique.md` (§7) est mis à jour dans le même commit.
+
+---
+
+## 2026-11-25 — Jalon J7 : CSP par nonce (`src/proxy.ts`), pool `worker_threads` pour `blindSign` et sonde `/api/health`
+
+**Contexte**
+1. Le cahier (§11) demande une CSP stricte sans `'unsafe-inline'` sur `script-src` si Next.js le permet avec des nonces.
+2. En charge (500 étudiants en sortie d'AG, §16), la signature aveugle `RSABSSA.SHA384.PSS.Randomized().blindSign` de `@cloudflare/blindrsa-ts` (SJCL en JS pur) prend ~182 ms par jeton sur un seul thread, ce qui saturerait la boucle d'événements principale (~91 s pour 500 signatures) et risquerait de dépasser le budget de 2 minutes.
+3. Le déploiement Scaleway Serverless Containers (§14) nécessite une sonde HTTP de disponibilité (`HEALTHCHECK`).
+
+**Décision**
+1. Ajout de `src/proxy.ts` (convention Next.js 16) générant un nonce cryptographique par requête HTML (`script-src 'self' 'nonce-<...>' 'strict-dynamic'`), en excluant `/api/*` du matcher afin que `POST /api/ballots` reste totalement isolée (invariant n°4). Les routes API conservent les en-têtes statiques stricts de `next.config.ts`.
+2. Exécution de `@cloudflare/blindrsa-ts` `blindSign` dans un pool borné de `node:worker_threads` (`src/lib/crypto/blind-sign-pool.ts`), sans réimplémenter aucune primitive cryptographique (invariant n°11) et avec remise à zéro immédiate des octets PKCS8 après chaque signature.
+3. Ajout de la route publique `GET /api/health` vérifiant la connectivité PostgreSQL (`SELECT 1`, `Cache-Control: no-store`), synchronisée au §8 du cahier technique.
+
+**Conséquence**
+- Zéro violation CSP et zéro `'unsafe-inline'` sur `script-src` vérifiés sous Chromium.
+- Le test de charge (`pnpm test:load`) exécute 500 jetons aveugles + 500 bulletins anonymes en ~30,4 s (budget max : 120 s) sans bloquer la boucle principale Next.js.
+- Zéro dépendance supplémentaire ajoutée.

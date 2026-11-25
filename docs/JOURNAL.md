@@ -134,3 +134,18 @@ Reste :
 - **J7 — Durcissement** : en-têtes/CSP, revue des logs, Playwright complet, test de charge (500 jetons et 500 bulletins en 2 minutes), Dockerfile et préparation déploiement Scaleway.
 Bloquant / question pour Junior :
 - Aucun.
+
+## 2026-11-25 12:25 — Antigravity — J7
+Fait :
+- Mis en place une **CSP stricte par nonce cryptographique par requête** via `src/proxy.ts` (convention Next.js 16) + `src/lib/security-headers.ts` + `connection()` dans `src/app/layout.tsx` : zéro `'unsafe-inline'` sur `script-src`, exclusion explicite de `/api/*` du matcher (préservant l'isolation totale de `POST /api/ballots`, invariant n°4), conservation de `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, `Permissions-Policy` et `HSTS` en production.
+- Réalisé la **revue complète des logs** et ajouté la suite d'invariants bloquants `tests/invariants/logs-and-security.test.ts` : zéro `console.*` dans `src/`, lecture IP strictement cantonnée à `src/lib/ratelimit.ts`, zéro ressource tierce dans l'UI (invariant n°8), vérification des en-têtes §11 et vérification en exécution réelle qu'aucune ligne de log produite lors des flux auth/admin/erreur ne contient `@` ni d'adresse IP.
+- Ajouté la sonde de disponibilité `GET /api/health` (`src/app/api/health/route.ts`, `Cache-Control: no-store`, vérification PostgreSQL `SELECT 1`).
+- Isolé l'appel `@cloudflare/blindrsa-ts` `blindSign` dans un pool borné de `node:worker_threads` (`src/lib/crypto/blind-sign-pool.ts`, zéro primitive réimplémentée, remise à zéro PKCS8) et livré le **test de charge reproductible** `scripts/load-test.ts` (`pnpm test:load`) : **500 jetons aveugles (29,31 s, 17,1/s) + 500 bulletins anonymes (1,10 s, 454,5/s) = 30,41 s au total** (budget max : 120 s), 1 003 lignes de log vérifiées avec `0` `@`.
+- Ajouté la 5ᵉ suite Playwright E2E `tests/e2e/hardening-and-csp.spec.ts` (en-têtes §11, nonces uniques, zéro violation CSP sous hydratation, zéro requête tierce, `/api/health`, comportement identique de `POST /api/ballots` avec/sans cookie) et branché Playwright E2E dans la CI GitHub Actions (`.github/workflows/ci.yml`).
+- Préparé le **déploiement Scaleway** (§14) : `Dockerfile` multi-stage Node 22 Alpine standalone (utilisateur non-root `nextjs`, `HEALTHCHECK` sur `/api/health`), `.dockerignore` et guide opérationnel `docs/deploiement-scaleway.md`.
+- Mis à jour `docs/decisions.md` et `docs/cahier-technique.md` (§8 et §16 : **J0 à J7 tous cochés**).
+- Vérifications finales : `pnpm lint`, `pnpm typecheck`, `pnpm test` (18 fichiers / 66 tests), `pnpm test:load` (30,41 s < 120 s), `pnpm test:e2e` (5 suites Chromium) et `pnpm build` tous verts.
+Reste :
+- Points organisationnels hors code avant lancement pilote (§15, §17) : vérification des alias `@etu.u-bordeaux.fr`, test de délivrabilité email sur boîtes étudiantes, désactivation/minimisation des logs IP côté plateforme Scaleway, structure porteuse (association loi 1901) et documentation du niveau de risque CNIL (délibération n° 2026-045) dans `docs/decisions.md`.
+Bloquant / question pour Junior :
+- Aucun bloquant technique : tous les jalons V1 (J0 à J7) sont terminés et verts.

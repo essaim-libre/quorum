@@ -474,6 +474,7 @@ Toutes les entrées sont validées par Zod. Les erreurs sont renvoyées en `{ er
 | POST | `/api/admin/votes/:id/cancel` | admin | Annulation motivée, journal |
 | POST | `/api/admin/petitions/:id/review` | admin | `approve`, `request_changes` ou `reject`, journal |
 | GET | `/api/journal` | public | Journal d'administration |
+| GET | `/api/health` | public | Sonde de disponibilité applicative et PostgreSQL (`no-store`) |
 
 Aucune route ne renvoie de décompte avant `closes_at`. Il n'existe pas non plus de route admin de résultats partiels.
 
@@ -687,7 +688,7 @@ Chaque jalon est terminé quand lint, typecheck et tests sont verts et que `docs
 - [x] **J4 — Clôture et résultats** : §6.5 et §6.6, page Résultats, liste des reçus, procès-verbal PDF, cron.
 - [x] **J5 — Pétitions** : §3 complet, Proposer, Signatures, « Contre », relecture, publication automatique.
 - [x] **J6 — Mode amphi, « Comment ça marche », journal, page données personnelles.**
-- [ ] **J7 — Durcissement** : en-têtes, CSP, revue des logs, Playwright complet, test de charge (500 jetons et 500 bulletins en 2 minutes), déploiement Scaleway.
+- [x] **J7 — Durcissement** : en-têtes, CSP, revue des logs, Playwright complet, test de charge (500 jetons et 500 bulletins en 2 minutes), déploiement Scaleway.
 
 ---
 
