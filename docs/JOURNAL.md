@@ -179,12 +179,17 @@ Reste :
 Bloquant / question pour Junior :
 - Aucun.
 
-## 2026-11-25 23:06 — Antigravity — Vitrine README publique et hygiène dépôt (`video/` local)
+## 2026-11-25 23:30 — Antigravity — Bilan de fin de session (V1 complète, durcie et publiée)
 Fait :
-- Maintenu le studio vidéo Remotion V2 **100 % en local** (`video/` ajouté à `.gitignore`, scripts `video:*` retirés du `package.json` racine pour garder le dépôt applicatif léger et propre).
-- Généré 5 visuels optimisés (< 265 Ko au total) dans `docs/assets/` (`hero-banner.jpg`, `preview-identity.jpg`, `preview-blind.jpg`, `preview-vote.jpg`, `preview-amphi.jpg`).
-- Refondu intégralement `README.md` en vitrine moderne : bannière hero sombre, badges colorés `for-the-badge` (dont CI live), navigation rapide, galerie 2×2 de captures HD, encart prêt pour le lecteur vidéo MP4 natif GitHub (`user-attachments`), diagramme Mermaid coloré du protocole RFC 9474, tableau des 11 invariants/métriques d'audit et guide de démarrage rapide.
-Reste :
-- Glisser-déposer `video/out/quorum-launch-1080p60.mp4` sur GitHub pour obtenir l'URL `user-attachments` et activer la lecture vidéo directe dans le `README.md`.
+- **J6 — Mode amphi & pages d’information** (`661975d`) : générateur QR autonome ISO 18004 (`src/lib/qr.ts`), `/amphi/[slug]` temps réel sans décompte partiel, `/comment-ca-marche`, `/journal` enrichi, `/donnees-personnelles` RGPD §15.
+- **J7 — Durcissement & déploiement** (`929a587`) : CSP stricte par nonce cryptographique (`src/proxy.ts`), revue complète des logs et invariants bloquants (`tests/invariants/logs-and-security.test.ts`), `/api/health`, pool `worker_threads` pour `blindSign`, test de charge 500 jetons + 500 bulletins en `30,41 s` (< 120 s), `Dockerfile` Node 24, guide `docs/deploiement-scaleway.md`, CI GitHub Actions avec Playwright.
+- **Finition UX/UI** (`4206d17`) : socle CSS de mouvement natif (`prefers-reduced-motion`), `StickyHeader`, `loading.tsx`, micro-interactions WAI-ARIA sur l’ensemble des parcours.
+- **Durcissement sécurité et résilience `SEC-01` à `SEC-17`** (`f3106ad`, `20ab034`, `9921b3f`) : `TRUSTED_PROXY_HOPS` + plafonds globaux, résilience OTP, limite JSON `413`, rate limit `/api/auth/verify`, clôture bloquante (`integrity_violation` affiché sur `/resultats` et `/recus`), bornage « Contre », recalcul dynamique `isAdmin` + TTL 24 h, verrous transactionnels PostgreSQL + index unique pétition active, défense CSRF `Origin`/`Sec-Fetch-Site`, validation exacte `MASTER_KEY` 32 octets, passage Node 24.
+- **Documentation publique & positionnement indépendant** (`9921b3f`) : vitrine `README.md` (bannière + 4 captures HD dans `docs/assets/`, badges, Mermaid RFC 9474, encart prêt pour vidéo GitHub), `SECURITY.md`, clarification du statut d’initiative étudiante indépendante dans `src/copy/fr.ts` et les docs.
+- **Studio vidéo Remotion V2 (local uniquement, ignoré dans `.gitignore`)** : `video/` avec 6 scènes isolées, smartphone titane 3D, audio procédural 120 BPM + réverbération de salle, audit géométrique 14/14 (16:9 et 9:16), master MP4 rendu dans `video/out/quorum-launch-1080p60.mp4`.
+- **État de vérification** : `pnpm lint`, `pnpm typecheck`, `pnpm test` (19 suites / 76 tests), `pnpm test:e2e` (5 suites Chromium) et `pnpm build` tous verts ; dépôt synchronisé sur `main` (`9921b3f`).
+Reste pour la prochaine session :
+- Optionnel : glisser-déposer `video/out/quorum-launch-1080p60.mp4` dans `README.md` sur GitHub pour activer le lecteur vidéo natif.
+- Étapes de mise en ligne Scaleway (§14, §15, §17) : nom de domaine, SMTP Scaleway Transactional Email, `TRUSTED_PROXY_HOPS=1`, cron sécurisé, structure porteuse (association loi 1901) et test réel sur boîte `@etu.u-bordeaux.fr`.
 Bloquant / question pour Junior :
-- Aucun.
+- Aucun. Bonne fin de soirée !
