@@ -28,7 +28,7 @@ export function ParticipationBar({
         className="relative h-[2px] w-full bg-rule"
       >
         <div
-          className="h-[2px] bg-ink"
+          className="h-[2px] bg-ink transition-[width] duration-500 ease-[var(--ease-quorum)]"
           style={{ width: `${clampedPercent}%` }}
         />
       </div>

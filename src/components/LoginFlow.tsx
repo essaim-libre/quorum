@@ -29,6 +29,7 @@ export function LoginFlow() {
   const [devCode, setDevCode] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resendSeconds, setResendSeconds] = useState(0);
+  const [codeShakeCount, setCodeShakeCount] = useState(0);
 
   const emailInputRef = useRef<HTMLInputElement | null>(null);
   const digitRefs = useRef<Array<HTMLInputElement | null>>([]);
@@ -101,6 +102,7 @@ export function LoginFlow() {
     const code = digits.join("");
     if (!/^\d{6}$/.test(code)) {
       setErrorMessage(copy.errors.invalid_code);
+      setCodeShakeCount((prev) => prev + 1);
       return;
     }
 
@@ -120,6 +122,7 @@ export function LoginFlow() {
 
       if (!response.ok) {
         setErrorMessage(getErrorMessage(payload?.error));
+        setCodeShakeCount((prev) => prev + 1);
         return;
       }
 
@@ -230,7 +233,7 @@ export function LoginFlow() {
       </header>
 
       {step === "welcome" && (
-        <>
+        <div key="welcome" className="quorum-animate-in flex flex-1 flex-col justify-between">
           <div className="my-auto py-12">
             <p className="text-question-list font-normal text-ink">
               {copy.app.tagline}
@@ -244,7 +247,7 @@ export function LoginFlow() {
                 setErrorMessage(null);
                 setStep("email");
               }}
-              className="flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg"
+              className="quorum-pressable flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg"
             >
               {copy.auth.startCta}
             </button>
@@ -252,25 +255,26 @@ export function LoginFlow() {
             <div className="flex flex-wrap gap-x-6 gap-y-1 pt-1">
               <Link
                 href="/comment-ca-marche"
-                className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink"
+                className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 transition-colors duration-150 hover:text-ink"
               >
                 {copy.auth.anonymityLink}
               </Link>
               <Link
                 href="/donnees-personnelles"
-                className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink"
+                className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 transition-colors duration-150 hover:text-ink"
               >
                 {copy.auth.privacyLink}
               </Link>
             </div>
           </footer>
-        </>
+        </div>
       )}
 
       {step === "email" && (
         <form
+          key="email"
           onSubmit={handleEmailSubmit}
-          className="flex flex-1 flex-col justify-between py-8"
+          className="quorum-animate-in flex flex-1 flex-col justify-between py-8"
           noValidate
         >
           <div className="flex flex-col gap-6">
@@ -344,7 +348,7 @@ export function LoginFlow() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg disabled:opacity-60"
+              className="quorum-pressable flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg disabled:opacity-60"
             >
               {isSubmitting ? copy.auth.emailSubmitting : copy.auth.emailSubmit}
             </button>
@@ -354,8 +358,9 @@ export function LoginFlow() {
 
       {step === "code" && (
         <form
+          key="code"
           onSubmit={handleCodeSubmit}
-          className="flex flex-1 flex-col justify-between py-8"
+          className="quorum-animate-in flex flex-1 flex-col justify-between py-8"
           noValidate
         >
           <div className="flex flex-col gap-6">
@@ -396,7 +401,12 @@ export function LoginFlow() {
               <legend className="text-meta font-medium text-ink">
                 {copy.auth.codeGroupLabel}
               </legend>
-              <div className="grid grid-cols-6 gap-2 sm:gap-3">
+              <div
+                key={codeShakeCount}
+                className={`grid grid-cols-6 gap-2 sm:gap-3 ${
+                  codeShakeCount > 0 ? "quorum-shake" : ""
+                }`}
+              >
                 {digits.map((digit, index) => (
                   <input
                     key={index}
@@ -414,7 +424,11 @@ export function LoginFlow() {
                     }
                     onPaste={(event) => handleDigitPaste(index, event)}
                     onKeyDown={(event) => handleDigitKeyDown(index, event)}
-                    className="h-[52px] w-full rounded-[2px] border border-ink bg-bg text-center font-mono text-heading text-ink"
+                    className={`h-[52px] w-full rounded-[2px] border text-center font-mono text-heading text-ink transition-colors duration-150 ${
+                      digit
+                        ? "border-2 border-ink bg-surface"
+                        : "border-ink bg-bg"
+                    }`}
                   />
                 ))}
               </div>
@@ -480,7 +494,7 @@ export function LoginFlow() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg disabled:opacity-60"
+              className="quorum-pressable flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg disabled:opacity-60"
             >
               {isSubmitting ? copy.auth.codeSubmitting : copy.auth.codeSubmit}
             </button>

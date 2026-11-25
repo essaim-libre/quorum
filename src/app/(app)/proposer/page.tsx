@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ProposePetitionFlow } from "@/components/ProposePetitionFlow";
+import { StickyHeader } from "@/components/StickyHeader";
 import { copy } from "@/copy/fr";
 import { getCurrentSession } from "@/lib/auth/session";
 
@@ -9,15 +10,13 @@ export default async function ProposePage() {
   const session = await getCurrentSession();
 
   return (
-    <main className="quorum-container py-6">
-      <header className="flex items-baseline justify-between border-b border-rule pb-4">
-        <span className="text-xl font-bold tracking-tight text-ink">
-          {copy.app.name}
-        </span>
-        <span className="text-mono-xs text-ink-2">{copy.app.institution}</span>
-      </header>
+    <main className="quorum-container pb-6">
+      <StickyHeader
+        condensedTitle={copy.petitions.proposeTitle}
+        rightMeta={copy.app.institution}
+      />
 
-      <section className="pt-6 pb-4">
+      <section className="quorum-animate-in pt-6 pb-4">
         <h1 className="text-question-detail font-bold text-ink">
           {copy.petitions.proposeTitle}
         </h1>

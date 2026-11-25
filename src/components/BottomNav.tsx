@@ -16,7 +16,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navigation principale"
-      className="fixed right-0 bottom-0 left-0 border-t border-rule bg-bg"
+      className="quorum-safe-bottom fixed right-0 bottom-0 left-0 z-30 border-t border-rule bg-bg"
     >
       <div className="quorum-container grid grid-cols-3">
         {items.map((item) => {
@@ -31,8 +31,8 @@ export function BottomNav() {
               aria-current={active ? "page" : undefined}
               className={
                 active
-                  ? "-mt-px flex min-h-[52px] items-center justify-center border-t-2 border-ink text-meta font-bold text-ink"
-                  : "flex min-h-[52px] items-center justify-center text-meta font-normal text-ink-2 hover:text-ink"
+                  ? "-mt-px flex min-h-[52px] items-center justify-center border-t-2 border-ink text-meta font-bold text-ink transition-colors duration-150"
+                  : "flex min-h-[52px] items-center justify-center border-t-2 border-transparent text-meta font-normal text-ink-2 transition-colors duration-150 hover:text-ink"
               }
             >
               {item.label}

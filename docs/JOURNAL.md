@@ -149,3 +149,15 @@ Reste :
 - Points organisationnels hors code avant lancement pilote (§15, §17) : vérification des alias `@etu.u-bordeaux.fr`, test de délivrabilité email sur boîtes étudiantes, désactivation/minimisation des logs IP côté plateforme Scaleway, structure porteuse (association loi 1901) et documentation du niveau de risque CNIL (délibération n° 2026-045) dans `docs/decisions.md`.
 Bloquant / question pour Junior :
 - Aucun bloquant technique : tous les jalons V1 (J0 à J7) sont terminés et verts.
+
+## 2026-11-25 13:10 — Antigravity — Finition UX/UI (post-J7)
+Fait :
+- Mis en place un socle CSS de mouvement natif (`src/app/globals.css`, zéro dépendance, zéro flou/ombre/dégradé, respect strict de `prefers-reduced-motion: reduce` et `safe-area-inset-bottom`).
+- Créé l'en-tête fixe contextuel `StickyHeader` (`src/components/StickyHeader.tsx`, fond opaque, `IntersectionObserver` sur le `<h1>`, filet `rule → ink`, titre condensé sur une ligne et action rapide « Voter » / « Résultats » au défilement sur `/votes/[slug]`), déployé sur l'ensemble des pages principales, de détail et d'information, et ajouté `src/app/(app)/loading.tsx` (squelette monochrome minimaliste).
+- Ajouté les micro-interactions sur les parcours clés : transitions d'étapes et secousse discrète OTP (`LoginFlow`), filet de progression `01/02 → 02/02`, navigation clavier WAI-ARIA `radiogroup` et barre indéterminée d'envoi anonyme (`BallotFlow`), apparition chorégraphiée et bouton « Copié » inversé (`VotedReceiptView`), navigation clavier `tablist` (`ArgumentsTabs`), progression continue 4 étapes (`ProposePetitionFlow`), barres de résultats animées en `scaleX` échelonnées (`/votes/[slug]/resultats`) et présence live en projection (`ParticipationBar`, `VoteStatusIndicator`, `AmphiDisplay`).
+- Ajouté la vérification E2E du passage `data-condensed="false" → "true"` au scroll dans `tests/e2e/hardening-and-csp.spec.ts`.
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` (18 fichiers / 66 tests), `pnpm build` et `pnpm test:e2e` (5 suites Chromium) tous verts.
+Reste :
+- Points organisationnels hors code avant ouverture pilote (§15, §17).
+Bloquant / question pour Junior :
+- Aucun.

@@ -194,7 +194,7 @@ export function AmphiDisplay({
       <div className="my-auto grid grid-cols-1 gap-10 py-8 lg:grid-cols-[1fr_320px] lg:items-start lg:gap-12">
         <section className="flex flex-col gap-8">
           <div className="flex flex-col gap-3">
-            <VoteStatusIndicator status={status} detail={statusDetail} />
+            <VoteStatusIndicator status={status} detail={statusDetail} live />
             <h1 className="text-question-detail font-bold text-ink lg:text-[3rem] lg:leading-[3.25rem]">
               {question}
             </h1>
@@ -215,7 +215,12 @@ export function AmphiDisplay({
                 data-testid="amphi-ballots-count"
                 className="text-display font-bold text-ink"
               >
-                {formattedBallots}
+                <span
+                  key={participation.ballots}
+                  className="quorum-animate-in inline-block"
+                >
+                  {formattedBallots}
+                </span>
               </p>
               <p className="text-body text-ink-2">
                 {copy.amphi.votersCountLabel(formattedElectorate, formattedRate)}

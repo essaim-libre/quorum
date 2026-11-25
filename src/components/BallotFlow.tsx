@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { StickyHeader } from "@/components/StickyHeader";
 import { copy, getErrorMessage } from "@/copy/fr";
 import type { StoredVoteToken } from "@/lib/client/token-store";
 import {
@@ -36,6 +37,8 @@ export function BallotFlow({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const radioRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
   useEffect(() => {
     let active = true;
     async function loadToken() {
@@ -66,6 +69,32 @@ export function BallotFlow({
   const selectedOption =
     options.find((opt) => opt.id === selectedOptionId) ?? null;
 
+  function handleOptionKeyDown(
+    index: number,
+    event: KeyboardEvent<HTMLButtonElement>,
+  ) {
+    if (options.length === 0) {
+      return;
+    }
+    if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+      event.preventDefault();
+      const nextIndex = (index + 1) % options.length;
+      const nextOpt = options[nextIndex];
+      if (nextOpt) {
+        setSelectedOptionId(nextOpt.id);
+        radioRefs.current[nextIndex]?.focus();
+      }
+    } else if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+      event.preventDefault();
+      const prevIndex = (index - 1 + options.length) % options.length;
+      const prevOpt = options[prevIndex];
+      if (prevOpt) {
+        setSelectedOptionId(prevOpt.id);
+        radioRefs.current[prevIndex]?.focus();
+      }
+    }
+  }
+
   async function handleConfirmVote() {
     if (!token || !selectedOption) {
       return;
@@ -88,19 +117,27 @@ export function BallotFlow({
     router.refresh();
   }
 
+  const stepProgressPercent = step === "choose" ? 50 : 100;
+
   return (
-    <main className="quorum-container flex min-h-dvh flex-col justify-between py-6">
+    <main className="quorum-container flex min-h-dvh flex-col justify-between pb-6">
       <div className="flex flex-col gap-6">
-        <div className="border-b border-rule pb-2">
-          <Link
-            href={`/votes/${slug}`}
-            className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink"
-          >
-            {copy.ballot.backToQuestion}
-          </Link>
+        <StickyHeader
+          condensedTitle={question}
+          backHref={`/votes/${slug}`}
+          backLabel={copy.ballot.backToQuestion}
+          rightMeta={step === "choose" ? "01 / 02" : "02 / 02"}
+        />
+
+        {/* Filet fin de progression d'étape (2 px) */}
+        <div aria-hidden="true" className="h-[2px] w-full bg-rule">
+          <div
+            className="h-[2px] bg-ink transition-[width] duration-300 ease-[var(--ease-quorum)]"
+            style={{ width: `${stepProgressPercent}%` }}
+          />
         </div>
 
-        <header className="quorum-section-rule pt-4">
+        <header className="pt-2">
           <p className="text-mono-xs uppercase text-ink-2">
             {step === "choose"
               ? copy.ballot.stepChoose
@@ -110,9 +147,12 @@ export function BallotFlow({
         </header>
 
         {tokenLoading && (
-          <p role="status" className="text-meta text-ink-2">
-            {copy.ballot.preparingToken}
-          </p>
+          <div role="status" className="flex flex-col gap-2">
+            <p className="text-meta text-ink-2">{copy.ballot.preparingToken}</p>
+            <div className="h-[2px] w-full overflow-hidden bg-rule">
+              <div className="quorum-indeterminate-bar h-[2px] w-1/2 bg-ink" />
+            </div>
+          </div>
         )}
 
         {tokenError === "unauthorized" && (
@@ -153,31 +193,49 @@ export function BallotFlow({
           )}
 
         {!tokenError && step === "choose" && (
-          <fieldset className="flex flex-col gap-3">
+          <fieldset key="choose" className="quorum-animate-in flex flex-col gap-3">
             <legend className="text-meta text-ink-2">
               {token?.hasVoted
                 ? copy.ballot.revoteHint
                 : copy.ballot.chooseHint}
             </legend>
-            <div className="flex flex-col gap-3 pt-1">
-              {options.map((option) => {
+            <div
+              role="radiogroup"
+              aria-label={question}
+              className="flex flex-col gap-3 pt-1"
+            >
+              {options.map((option, index) => {
                 const selected = option.id === selectedOptionId;
                 return (
                   <button
                     key={option.id}
+                    ref={(el) => {
+                      radioRefs.current[index] = el;
+                    }}
                     type="button"
                     role="radio"
                     aria-checked={selected}
                     onClick={() => setSelectedOptionId(option.id)}
+                    onKeyDown={(event) => handleOptionKeyDown(index, event)}
                     className={
                       selected
-                        ? "flex min-h-[56px] w-full cursor-pointer items-center justify-between border border-ink bg-ink px-4 py-3 text-left text-body font-bold text-bg"
-                        : "flex min-h-[56px] w-full cursor-pointer items-center justify-between border border-ink bg-bg px-4 py-3 text-left text-body font-normal text-ink"
+                        ? "quorum-pressable flex min-h-[56px] w-full cursor-pointer items-center justify-between gap-4 border border-ink bg-ink px-4 py-3 text-left text-body font-bold text-bg"
+                        : "quorum-pressable flex min-h-[56px] w-full cursor-pointer items-center justify-between gap-4 border border-ink bg-bg px-4 py-3 text-left text-body font-normal text-ink hover:bg-surface"
                     }
                   >
                     <span>{option.label}</span>
-                    <span className="text-mono-xs">
-                      {String(option.position).padStart(2, "0")}
+                    <span className="flex shrink-0 items-center gap-3">
+                      <span className="text-mono-xs">
+                        {String(option.position).padStart(2, "0")}
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        className={
+                          selected
+                            ? "inline-block h-2.5 w-2.5 border border-bg bg-bg"
+                            : "inline-block h-2.5 w-2.5 border border-ink bg-transparent"
+                        }
+                      />
                     </span>
                   </button>
                 );
@@ -187,7 +245,10 @@ export function BallotFlow({
         )}
 
         {!tokenError && step === "confirm" && selectedOption && (
-          <section className="quorum-rule flex flex-col gap-4 pt-6">
+          <section
+            key="confirm"
+            className="quorum-animate-in quorum-rule flex flex-col gap-4 pt-6"
+          >
             <p className="text-meta text-ink-2">{copy.ballot.selectedLabel}</p>
             <div className="border border-ink bg-ink p-5 text-heading font-bold text-bg">
               {selectedOption.label}
@@ -213,7 +274,7 @@ export function BallotFlow({
               setSubmitError(null);
               setStep("confirm");
             }}
-            className="flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg disabled:cursor-not-allowed disabled:opacity-40"
+            className="quorum-pressable flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg disabled:cursor-not-allowed disabled:opacity-40"
           >
             {copy.ballot.continueCta}
           </button>
@@ -221,11 +282,19 @@ export function BallotFlow({
 
         {!tokenError && step === "confirm" && (
           <>
+            {isSubmitting && (
+              <div
+                aria-hidden="true"
+                className="h-[2px] w-full overflow-hidden bg-rule"
+              >
+                <div className="quorum-indeterminate-bar h-[2px] w-1/2 bg-ink" />
+              </div>
+            )}
             <button
               type="button"
               disabled={isSubmitting || !token}
               onClick={handleConfirmVote}
-              className="flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg disabled:opacity-60"
+              className="quorum-pressable flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg disabled:opacity-60"
             >
               {isSubmitting
                 ? copy.ballot.submittingCta
@@ -238,7 +307,7 @@ export function BallotFlow({
                 setSubmitError(null);
                 setStep("choose");
               }}
-              className="inline-flex min-h-[48px] cursor-pointer items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink disabled:opacity-60"
+              className="inline-flex min-h-[48px] cursor-pointer items-center text-meta text-ink-2 underline underline-offset-4 transition-colors duration-150 hover:text-ink disabled:opacity-60"
             >
               {copy.ballot.changeChoice}
             </button>

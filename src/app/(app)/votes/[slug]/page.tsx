@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArgumentsTabs } from "@/components/ArgumentsTabs";
 import { ParticipationBar } from "@/components/ParticipationBar";
+import { StickyHeader } from "@/components/StickyHeader";
 import { TokenPrefetcher } from "@/components/TokenPrefetcher";
 import { VoteStatusIndicator } from "@/components/VoteStatusIndicator";
 import { copy } from "@/copy/fr";
@@ -41,8 +42,15 @@ export default async function VoteDetailPage({
         ? copy.votes.opensAt(formatDateTimeParis(opensDate))
         : copy.votes.closedAt(formatDateTimeParis(closesDate));
 
+  const quickAction =
+    vote.status === "open"
+      ? { href: `/votes/${vote.slug}/bulletin`, label: copy.votes.voteCta }
+      : vote.status === "closed"
+        ? { href: `/votes/${vote.slug}/resultats`, label: copy.votes.seeResults }
+        : undefined;
+
   return (
-    <main className="quorum-container py-6">
+    <main className="quorum-container pb-6">
       <TokenPrefetcher
         voteId={vote.id}
         slug={vote.slug}
@@ -50,16 +58,14 @@ export default async function VoteDetailPage({
         publicKeySpkiBase64={vote.publicKeySpkiBase64}
         enabled={vote.status === "open" && session !== null}
       />
-      <div className="border-b border-rule pb-2">
-        <Link
-          href="/votes"
-          className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink"
-        >
-          {copy.votes.backToVotes}
-        </Link>
-      </div>
+      <StickyHeader
+        condensedTitle={vote.question}
+        backHref="/votes"
+        backLabel={copy.votes.backToVotes}
+        quickAction={quickAction}
+      />
 
-      <header className="flex flex-col gap-4 py-6">
+      <header className="quorum-animate-in flex flex-col gap-4 py-6">
         <VoteStatusIndicator status={vote.status} detail={statusDetail} />
         <h1 className="text-question-detail font-bold text-ink">
           {vote.question}
@@ -171,7 +177,7 @@ export default async function VoteDetailPage({
         {vote.status === "open" && (
           <Link
             href={`/votes/${vote.slug}/bulletin`}
-            className="flex h-[52px] w-full items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg"
+            className="quorum-pressable flex h-[52px] w-full items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg"
           >
             {copy.votes.voteCta}
           </Link>
@@ -179,7 +185,7 @@ export default async function VoteDetailPage({
         {vote.status === "closed" && (
           <Link
             href={`/votes/${vote.slug}/resultats`}
-            className="flex h-[52px] w-full items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg"
+            className="quorum-pressable flex h-[52px] w-full items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg"
           >
             {copy.votes.seeResults}
           </Link>

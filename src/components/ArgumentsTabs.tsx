@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type KeyboardEvent, useRef, useState } from "react";
 import { copy } from "@/copy/fr";
 
 export function ArgumentsTabs({
@@ -15,6 +15,21 @@ export function ArgumentsTabs({
   readonly argumentContreAuthor: string | null;
 }) {
   const [active, setActive] = useState<"pour" | "contre">("pour");
+  const pourTabRef = useRef<HTMLButtonElement | null>(null);
+  const contreTabRef = useRef<HTMLButtonElement | null>(null);
+
+  function handleTabKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+      event.preventDefault();
+      if (active === "pour") {
+        setActive("contre");
+        contreTabRef.current?.focus();
+      } else {
+        setActive("pour");
+        pourTabRef.current?.focus();
+      }
+    }
+  }
 
   return (
     <section className="quorum-section-rule py-6">
@@ -28,31 +43,37 @@ export function ArgumentsTabs({
         className="mt-4 grid grid-cols-2 border border-ink"
       >
         <button
+          ref={pourTabRef}
           type="button"
           role="tab"
           id="tab-pour"
           aria-selected={active === "pour"}
           aria-controls="panel-pour"
+          tabIndex={active === "pour" ? 0 : -1}
           onClick={() => setActive("pour")}
+          onKeyDown={handleTabKeyDown}
           className={
             active === "pour"
-              ? "min-h-[48px] cursor-pointer border-r border-ink bg-ink px-4 text-meta font-bold text-bg"
-              : "min-h-[48px] cursor-pointer border-r border-ink bg-bg px-4 text-meta font-medium text-ink"
+              ? "min-h-[48px] cursor-pointer border-r border-ink bg-ink px-4 text-meta font-bold text-bg transition-colors duration-150"
+              : "min-h-[48px] cursor-pointer border-r border-ink bg-bg px-4 text-meta font-medium text-ink transition-colors duration-150 hover:bg-surface"
           }
         >
           {copy.votes.argumentPourTab}
         </button>
         <button
+          ref={contreTabRef}
           type="button"
           role="tab"
           id="tab-contre"
           aria-selected={active === "contre"}
           aria-controls="panel-contre"
+          tabIndex={active === "contre" ? 0 : -1}
           onClick={() => setActive("contre")}
+          onKeyDown={handleTabKeyDown}
           className={
             active === "contre"
-              ? "min-h-[48px] cursor-pointer bg-ink px-4 text-meta font-bold text-bg"
-              : "min-h-[48px] cursor-pointer bg-bg px-4 text-meta font-medium text-ink"
+              ? "min-h-[48px] cursor-pointer bg-ink px-4 text-meta font-bold text-bg transition-colors duration-150"
+              : "min-h-[48px] cursor-pointer bg-bg px-4 text-meta font-medium text-ink transition-colors duration-150 hover:bg-surface"
           }
         >
           {copy.votes.argumentContreTab}
@@ -61,10 +82,11 @@ export function ArgumentsTabs({
 
       {active === "pour" ? (
         <div
+          key="pour"
           id="panel-pour"
           role="tabpanel"
           aria-labelledby="tab-pour"
-          className="pt-5"
+          className="quorum-animate-in pt-5"
         >
           <p className="text-body whitespace-pre-line text-ink">
             {argumentPour}
@@ -75,10 +97,11 @@ export function ArgumentsTabs({
         </div>
       ) : (
         <div
+          key="contre"
           id="panel-contre"
           role="tabpanel"
           aria-labelledby="tab-contre"
-          className="pt-5"
+          className="quorum-animate-in pt-5"
         >
           {argumentContre ? (
             <>

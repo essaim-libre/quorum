@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PetitionDetailClient } from "@/components/PetitionDetailClient";
+import { StickyHeader } from "@/components/StickyHeader";
 import { copy } from "@/copy/fr";
 import { getCurrentSession } from "@/lib/auth/session";
 import {
@@ -46,17 +46,14 @@ export default async function PetitionDetailPage({
         : copy.petitions.states[petition.state];
 
   return (
-    <main className="quorum-container py-6">
-      <div className="border-b border-rule pb-2">
-        <Link
-          href="/petitions"
-          className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink"
-        >
-          {copy.petitions.tabList}
-        </Link>
-      </div>
+    <main className="quorum-container pb-6">
+      <StickyHeader
+        condensedTitle={petition.question}
+        backHref="/petitions"
+        backLabel={copy.petitions.tabList}
+      />
 
-      <header className="flex flex-col gap-4 py-6">
+      <header className="quorum-animate-in flex flex-col gap-4 py-6">
         <p className="text-meta text-ink-2">
           <span className="font-medium text-ink">
             {copy.petitions.states[petition.state]}

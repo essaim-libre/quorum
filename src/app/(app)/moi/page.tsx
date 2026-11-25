@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/LogoutButton";
 import { MyReceiptsList } from "@/components/MyReceiptsList";
+import { StickyHeader } from "@/components/StickyHeader";
 import { copy } from "@/copy/fr";
 import { getCurrentSession } from "@/lib/auth/session";
 
@@ -14,8 +15,13 @@ export default async function MePage() {
   }
 
   return (
-    <main className="quorum-container py-8">
-      <header className="quorum-section-rule pt-4 pb-6">
+    <main className="quorum-container pb-8">
+      <StickyHeader
+        condensedTitle={copy.me.title}
+        rightMeta={copy.app.institution}
+      />
+
+      <header className="quorum-animate-in pt-6 pb-6">
         <p className="text-mono-xs text-ink-2">{copy.app.institution}</p>
         <h1 className="text-question-detail mt-2 font-bold text-ink">
           {copy.me.title}

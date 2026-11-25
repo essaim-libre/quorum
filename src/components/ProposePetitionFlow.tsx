@@ -142,30 +142,38 @@ export function ProposePetitionFlow({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6 pt-4" noValidate>
-      {/* Indicateur d'étapes 1/4 à 4/4 */}
-      <ol className="grid grid-cols-4 border-t border-b border-ink">
-        {copy.petitions.steps.map((label, index) => {
-          const isActive = index === step;
-          const isDone = index < step;
-          return (
-            <li
-              key={label}
-              className={
-                isActive
-                  ? "bg-ink px-2 py-3 text-center text-mono-xs font-bold text-bg"
-                  : isDone
-                    ? "px-2 py-3 text-center text-mono-xs font-medium text-ink"
-                    : "px-2 py-3 text-center text-mono-xs text-ink-2"
-              }
-            >
-              {index + 1}. {label}
-            </li>
-          );
-        })}
-      </ol>
+      {/* Indicateur d'étapes 1/4 à 4/4 + filet de progression continu */}
+      <div>
+        <ol className="grid grid-cols-4 border-t border-b border-ink">
+          {copy.petitions.steps.map((label, index) => {
+            const isActive = index === step;
+            const isDone = index < step;
+            return (
+              <li
+                key={label}
+                className={
+                  isActive
+                    ? "bg-ink px-2 py-3 text-center text-mono-xs font-bold text-bg transition-colors duration-150"
+                    : isDone
+                      ? "px-2 py-3 text-center text-mono-xs font-medium text-ink transition-colors duration-150"
+                      : "px-2 py-3 text-center text-mono-xs text-ink-2 transition-colors duration-150"
+                }
+              >
+                {index + 1}. {label}
+              </li>
+            );
+          })}
+        </ol>
+        <div aria-hidden="true" className="h-[2px] w-full bg-rule">
+          <div
+            className="h-[2px] bg-ink transition-[width] duration-300 ease-[var(--ease-quorum)]"
+            style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
+          />
+        </div>
+      </div>
 
       {step === 0 && (
-        <div className="flex flex-col gap-5">
+        <div key="step-0" className="quorum-animate-in flex flex-col gap-5">
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between">
               <label htmlFor="petition-question" className="text-meta font-medium">
@@ -210,7 +218,7 @@ export function ProposePetitionFlow({
       )}
 
       {step === 1 && (
-        <fieldset className="flex flex-col gap-3">
+        <fieldset key="step-1" className="quorum-animate-in flex flex-col gap-3">
           <legend className="text-meta font-medium text-ink">
             {copy.admin.fields.options}
           </legend>
@@ -257,7 +265,7 @@ export function ProposePetitionFlow({
       )}
 
       {step === 2 && (
-        <div className="flex flex-col gap-5">
+        <div key="step-2" className="quorum-animate-in flex flex-col gap-5">
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between">
               <label htmlFor="petition-pour" className="text-meta font-medium">
@@ -384,7 +392,7 @@ export function ProposePetitionFlow({
       )}
 
       {step === 3 && (
-        <div className="flex flex-col gap-5">
+        <div key="step-3" className="quorum-animate-in flex flex-col gap-5">
           <div className="flex flex-col gap-3">
             <label htmlFor="petition-duration" className="text-meta font-medium">
               {copy.petitions.durationLabel}
@@ -399,8 +407,8 @@ export function ProposePetitionFlow({
                     onClick={() => setDurationHours(preset.hours)}
                     className={
                       selected
-                        ? "min-h-[48px] cursor-pointer border border-ink bg-ink px-3 text-meta font-bold text-bg"
-                        : "min-h-[48px] cursor-pointer border border-ink bg-bg px-3 text-meta text-ink"
+                        ? "quorum-pressable min-h-[48px] cursor-pointer border border-ink bg-ink px-3 text-meta font-bold text-bg"
+                        : "quorum-pressable min-h-[48px] cursor-pointer border border-ink bg-bg px-3 text-meta text-ink hover:bg-surface"
                     }
                   >
                     {preset.label}
@@ -438,7 +446,7 @@ export function ProposePetitionFlow({
           <button
             type="button"
             onClick={handleNext}
-            className="flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg"
+            className="quorum-pressable flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg"
           >
             {copy.ballot.continueCta}
           </button>
@@ -446,7 +454,7 @@ export function ProposePetitionFlow({
           <button
             type="submit"
             disabled={submitting}
-            className="flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg disabled:opacity-60"
+            className="quorum-pressable flex h-[52px] w-full cursor-pointer items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg disabled:opacity-60"
           >
             {submitting
               ? copy.petitions.submittingPetition

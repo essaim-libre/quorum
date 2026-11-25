@@ -50,14 +50,26 @@ export function VotedReceiptView({
   return (
     <main className="quorum-container flex min-h-dvh flex-col justify-between py-6">
       <div className="flex flex-col gap-6">
-        <header className="quorum-section-rule pt-6">
-          <h1 className="text-voted font-bold text-ink">
+        <header className="pt-2">
+          <div
+            aria-hidden="true"
+            className="quorum-rule-animated h-[2px] w-full bg-ink"
+          />
+          <h1 className="quorum-animate-in text-voted mt-6 font-bold text-ink">
             {copy.voted.heading}
           </h1>
-          <p className="text-body mt-4 text-ink-2">{question}</p>
+          <p
+            className="quorum-animate-in text-body mt-4 text-ink-2"
+            style={{ animationDelay: "80ms" }}
+          >
+            {question}
+          </p>
         </header>
 
-        <section className="quorum-rule py-6">
+        <section
+          className="quorum-animate-in quorum-rule py-6"
+          style={{ animationDelay: "140ms" }}
+        >
           <p className="text-meta text-ink-2">{copy.voted.receiptLabel}</p>
           {loaded && receipt ? (
             <div className="mt-3 flex flex-wrap items-center justify-between gap-4 border border-ink p-4">
@@ -70,9 +82,30 @@ export function VotedReceiptView({
               <button
                 type="button"
                 onClick={handleCopy}
-                className="inline-flex min-h-[48px] cursor-pointer items-center text-meta font-medium text-ink underline underline-offset-4"
+                aria-live="polite"
+                className={`quorum-pressable inline-flex min-h-[48px] cursor-pointer items-center gap-2 rounded-[2px] px-3 text-meta font-medium ${
+                  copied
+                    ? "bg-ink text-bg"
+                    : "text-ink underline underline-offset-4 hover:bg-surface"
+                }`}
               >
-                {copied ? copy.voted.copied : copy.voted.copyReceipt}
+                <span>{copied ? copy.voted.copied : copy.voted.copyReceipt}</span>
+                {copied && (
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M3 8.5L6.5 12L13 4.5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="square"
+                    />
+                  </svg>
+                )}
               </button>
             </div>
           ) : loaded ? (
@@ -93,14 +126,14 @@ export function VotedReceiptView({
       <footer className="flex flex-col gap-3 pt-6 pb-8">
         <Link
           href="/votes"
-          className="flex h-[52px] w-full items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg"
+          className="quorum-pressable flex h-[52px] w-full items-center justify-start rounded-[2px] bg-ink px-4 text-left text-body font-medium text-bg"
         >
           {copy.votes.backToVotes}
         </Link>
         {isOpen && (
           <Link
             href={`/votes/${slug}/bulletin`}
-            className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink"
+            className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 transition-colors duration-150 hover:text-ink"
           >
             {copy.voted.revoteLink}
           </Link>

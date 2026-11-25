@@ -1,22 +1,18 @@
 import Link from "next/link";
+import { StickyHeader } from "@/components/StickyHeader";
 import { copy } from "@/copy/fr";
 
 export default function HowItWorksPage() {
   return (
-    <main className="quorum-container py-6">
-      <header className="flex items-baseline justify-between border-b border-rule pb-4">
-        <Link href="/" className="text-xl font-bold tracking-tight text-ink">
-          {copy.app.name}
-        </Link>
-        <Link
-          href="/votes"
-          className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink"
-        >
-          {copy.howItWorks.backVotes}
-        </Link>
-      </header>
+    <main className="quorum-container pb-6">
+      <StickyHeader
+        condensedTitle={copy.howItWorks.title}
+        backHref="/votes"
+        backLabel={copy.howItWorks.backVotes}
+        rightMeta={copy.app.name}
+      />
 
-      <section className="quorum-section-rule mt-6 pt-4 pb-6">
+      <section className="quorum-animate-in pt-6 pb-6">
         <p className="text-mono-xs text-ink-2">{copy.app.institution}</p>
         <h1 className="text-question-detail mt-2 font-bold text-ink">
           {copy.howItWorks.title}

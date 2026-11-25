@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { StickyHeader } from "@/components/StickyHeader";
 import { copy } from "@/copy/fr";
 import {
   formatDateTimeParis,
@@ -47,20 +48,15 @@ export default async function VoteResultsPage({
     tally.tokensIssued !== null ? formatNumberFr(tally.tokensIssued) : "—";
 
   return (
-    <main className="quorum-container py-6">
-      <div className="flex items-baseline justify-between border-b border-ink pb-2">
-        <Link
-          href="/votes?view=closed"
-          className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink"
-        >
-          {copy.votes.backToVotes}
-        </Link>
-        <span className="text-mono-xs font-bold uppercase tracking-wider text-ink">
-          {copy.results.pageLabel}
-        </span>
-      </div>
+    <main className="quorum-container pb-6">
+      <StickyHeader
+        condensedTitle={report.question}
+        backHref="/votes?view=closed"
+        backLabel={copy.votes.backToVotes}
+        rightMeta={copy.results.pageLabel}
+      />
 
-      <header className="flex flex-col gap-3 py-6">
+      <header className="quorum-animate-in flex flex-col gap-3 py-6">
         <p className="text-mono-xs text-ink-2">
           {copy.results.deadlineLabel(formatDateTimeParis(report.closesAt))}
         </p>
@@ -100,7 +96,7 @@ export default async function VoteResultsPage({
         </p>
 
         <div className="mt-6 flex flex-col gap-5">
-          {tally.options.map((opt) => {
+          {tally.options.map((opt, index) => {
             const pct = opt.expressedPercent ?? 0;
             const pctText = formatSingleDecimalPercent(pct);
             const votesText = copy.results.votesCount(
@@ -122,8 +118,11 @@ export default async function VoteResultsPage({
                   className="h-6 w-full bg-rule"
                 >
                   <div
-                    className="h-6 bg-ink"
-                    style={{ width: `${Math.max(0, Math.min(100, pct))}%` }}
+                    className="quorum-bar-animated h-6 bg-ink"
+                    style={{
+                      width: `${Math.max(0, Math.min(100, pct))}%`,
+                      animationDelay: `${index * 60}ms`,
+                    }}
                   />
                 </div>
               </div>
@@ -145,12 +144,13 @@ export default async function VoteResultsPage({
                   className="h-6 w-full bg-rule"
                 >
                   <div
-                    className="h-6 bg-blank"
+                    className="quorum-bar-animated h-6 bg-blank"
                     style={{
                       width: `${Math.max(
                         0,
                         Math.min(100, (tally.blankCount / tally.totalBallots) * 100),
                       )}%`,
+                      animationDelay: `${tally.options.length * 60}ms`,
                     }}
                   />
                 </div>

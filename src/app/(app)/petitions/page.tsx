@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { StickyHeader } from "@/components/StickyHeader";
 import { copy } from "@/copy/fr";
 import {
   formatDateTimeParis,
@@ -31,15 +32,13 @@ export default async function PetitionsListPage({
   const nowDate = new Date();
 
   return (
-    <main className="quorum-container py-6">
-      <header className="flex items-baseline justify-between border-b border-rule pb-4">
-        <span className="text-xl font-bold tracking-tight text-ink">
-          {copy.app.name}
-        </span>
-        <span className="text-mono-xs text-ink-2">{copy.app.institution}</span>
-      </header>
+    <main className="quorum-container pb-6">
+      <StickyHeader
+        condensedTitle={`${copy.petitions.listTitle} · ${copy.petitions.views[activeView]}`}
+        rightMeta={copy.app.institution}
+      />
 
-      <section className="pt-6 pb-4">
+      <section className="quorum-animate-in pt-6 pb-4">
         <h1 className="text-question-detail font-bold text-ink">
           {copy.petitions.listTitle}
         </h1>

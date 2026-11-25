@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ReceiptsDirectory } from "@/components/ReceiptsDirectory";
+import { StickyHeader } from "@/components/StickyHeader";
 import { copy } from "@/copy/fr";
 import { formatNumberFr } from "@/lib/dates";
 import { getDb, getPool } from "@/lib/db/client";
@@ -30,17 +30,14 @@ export default async function VoteReceiptsPage({
       : "—";
 
   return (
-    <main className="quorum-container py-6">
-      <div className="border-b border-rule pb-2">
-        <Link
-          href={`/votes/${report.slug}/resultats`}
-          className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink"
-        >
-          {copy.receipts.backToResults}
-        </Link>
-      </div>
+    <main className="quorum-container pb-6">
+      <StickyHeader
+        condensedTitle={copy.receipts.title}
+        backHref={`/votes/${report.slug}/resultats`}
+        backLabel={copy.receipts.backToResults}
+      />
 
-      <header className="flex flex-col gap-3 py-6">
+      <header className="quorum-animate-in flex flex-col gap-3 py-6">
         <h1 className="text-heading font-bold text-ink">
           {copy.receipts.title}
         </h1>

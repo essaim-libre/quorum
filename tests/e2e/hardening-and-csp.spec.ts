@@ -84,6 +84,13 @@ test.describe("durcissement J7 — en-têtes HTTP, CSP par nonce, zéro tiers et
       cspViolations.push(...violations);
     }
 
+    // Vérifie le comportement de l'en-tête fixe contextuel (StickyHeader) au défilement
+    await page.goto("/comment-ca-marche");
+    const stickyHeader = page.locator("header[data-condensed]");
+    await expect(stickyHeader).toHaveAttribute("data-condensed", "false");
+    await page.evaluate(() => window.scrollTo(0, 600));
+    await expect(stickyHeader).toHaveAttribute("data-condensed", "true");
+
     // Vérifie que l'hydratation React fonctionne sous la CSP stricte par nonce
     await page.goto("/");
     await page.getByRole("button", { name: "Recevoir un code" }).click();
