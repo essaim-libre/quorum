@@ -249,12 +249,18 @@ export function LoginFlow() {
               {copy.auth.startCta}
             </button>
 
-            <div className="pt-1">
+            <div className="flex flex-wrap gap-x-6 gap-y-1 pt-1">
               <Link
                 href="/comment-ca-marche"
                 className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink"
               >
                 {copy.auth.anonymityLink}
+              </Link>
+              <Link
+                href="/donnees-personnelles"
+                className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink"
+              >
+                {copy.auth.privacyLink}
               </Link>
             </div>
           </footer>

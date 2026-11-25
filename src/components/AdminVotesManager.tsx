@@ -593,12 +593,20 @@ export function AdminVotesManager({
 
                 {vote.state === "published" && (
                   <div className="flex flex-col gap-3 border-t border-rule pt-4">
-                    <Link
-                      href={`/votes/${vote.slug}`}
-                      className="inline-flex min-h-[48px] items-center text-meta font-medium text-ink underline underline-offset-4"
-                    >
-                      {copy.admin.actions.openPublicPage}
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-6">
+                      <Link
+                        href={`/votes/${vote.slug}`}
+                        className="inline-flex min-h-[48px] items-center text-meta font-medium text-ink underline underline-offset-4"
+                      >
+                        {copy.admin.actions.openPublicPage}
+                      </Link>
+                      <Link
+                        href={`/amphi/${vote.slug}`}
+                        className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink"
+                      >
+                        {copy.admin.actions.openAmphiPage}
+                      </Link>
+                    </div>
 
                     <div className="flex flex-col gap-2 sm:flex-row">
                       <input

@@ -85,8 +85,16 @@ describe("invariants J2 — cycle de vie des votes, confidentialité et journal"
       closesAt: null,
     });
 
-    // Un brouillon n'est pas visible côté public
+    // Un brouillon n'est pas visible côté public ni dévoilé dans le journal
     expect(await getPublishedVoteBySlug(db, draft.slug)).toBeNull();
+    const draftJournal = await listPublicJournal(db, {
+      limit: 50,
+      targetType: "vote",
+    });
+    const draftEntry = draftJournal.find((entry) => entry.targetId === draft.id);
+    expect(draftEntry?.targetHref).toBeNull();
+    expect(draftEntry?.targetLabel).toContain("Brouillon de scrutin");
+    expect(draftEntry?.targetLabel).not.toContain("journée banalisée");
 
     // 2. Modification autorisée tant que le vote est en brouillon
     const updated = await updateVoteDraft(db, draft.id, {
@@ -178,6 +186,19 @@ describe("invariants J2 — cycle de vie des votes, confidentialité et journal"
     const participation = await getVoteParticipationBySlug(db, draft.slug);
     expect(participation?.ballots).toBe(1);
     expect(participation?.electorateSize).toBe(56000);
+
+    // Journal enrichi pour un scrutin publié : intitulé et lien public
+    const publishedJournal = await listPublicJournal(db, {
+      limit: 50,
+      targetType: "vote",
+    });
+    const pubEntry = publishedJournal.find(
+      (entry) => entry.targetId === draft.id && entry.action === "vote.publish",
+    );
+    expect(pubEntry?.targetLabel).toBe(
+      "Organiser une journée banalisée vendredi prochain ?",
+    );
+    expect(pubEntry?.targetHref).toBe(`/votes/${draft.slug}`);
 
     // 6. Annulation motivée (§2.4) : supprime les bulletins, efface la clé privée, journalise
     const cancelled = await cancelPublishedVote(db, draft.id, {

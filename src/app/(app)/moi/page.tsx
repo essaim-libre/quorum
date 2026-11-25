@@ -58,6 +58,12 @@ export default async function MePage() {
         >
           {copy.me.journalLink}
         </Link>
+        <Link
+          href="/donnees-personnelles"
+          className="inline-flex min-h-[48px] items-center text-body text-ink underline underline-offset-4"
+        >
+          {copy.me.privacyLink}
+        </Link>
         <LogoutButton />
       </section>
     </main>

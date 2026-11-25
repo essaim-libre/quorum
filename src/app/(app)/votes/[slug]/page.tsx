@@ -167,7 +167,7 @@ export default async function VoteDetailPage({
         </dl>
       </section>
 
-      <footer className="py-6">
+      <footer className="flex flex-col gap-3 py-6">
         {vote.status === "open" && (
           <Link
             href={`/votes/${vote.slug}/bulletin`}
@@ -186,6 +186,16 @@ export default async function VoteDetailPage({
         )}
         {vote.status === "upcoming" && (
           <p className="text-meta text-ink-2">{copy.votes.upcomingNotice}</p>
+        )}
+        {vote.status !== "closed" && (
+          <div>
+            <Link
+              href={`/amphi/${vote.slug}`}
+              className="inline-flex min-h-[48px] items-center text-meta text-ink-2 underline underline-offset-4 hover:text-ink"
+            >
+              {copy.votes.amphiLink}
+            </Link>
+          </div>
         )}
       </footer>
     </main>

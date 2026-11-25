@@ -686,7 +686,7 @@ Chaque jalon est terminé quand lint, typecheck et tests sont verts et que `docs
 - [x] **J3 — Vote anonyme** : §6.1 à §6.4, wrapper crypto avec vecteurs RFC, IndexedDB, Bulletin, Confirmation, A voté, Mes reçus. Tests d'invariants.
 - [x] **J4 — Clôture et résultats** : §6.5 et §6.6, page Résultats, liste des reçus, procès-verbal PDF, cron.
 - [x] **J5 — Pétitions** : §3 complet, Proposer, Signatures, « Contre », relecture, publication automatique.
-- [ ] **J6 — Mode amphi, « Comment ça marche », journal, page données personnelles.**
+- [x] **J6 — Mode amphi, « Comment ça marche », journal, page données personnelles.**
 - [ ] **J7 — Durcissement** : en-têtes, CSP, revue des logs, Playwright complet, test de charge (500 jetons et 500 bulletins en 2 minutes), déploiement Scaleway.
 
 ---

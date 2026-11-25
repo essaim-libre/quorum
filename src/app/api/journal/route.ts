@@ -1,11 +1,25 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getDb } from "@/lib/db/client";
 import { listPublicJournal } from "@/lib/journal";
 import { log } from "@/lib/log";
 
-export async function GET(): Promise<NextResponse> {
+const querySchema = z.object({
+  type: z.enum(["vote", "petition"]).optional(),
+});
+
+export async function GET(request: Request): Promise<NextResponse> {
+  const url = new URL(request.url);
+  const rawType = url.searchParams.get("type") ?? undefined;
+  const parsed = querySchema.safeParse({ type: rawType });
+  if (!parsed.success) {
+    return NextResponse.json({ error: "invalid_request" }, { status: 400 });
+  }
+
   try {
-    const entries = await listPublicJournal(getDb());
+    const entries = await listPublicJournal(getDb(), {
+      targetType: parsed.data.type,
+    });
     return NextResponse.json({ entries }, { status: 200 });
   } catch (error: unknown) {
     const reason = error instanceof Error ? error.message : "unknown";

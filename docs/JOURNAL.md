@@ -120,3 +120,17 @@ Reste pour la prochaine session :
 - **J7** : Durcissement (en-têtes/CSP, revue des logs, Playwright complet, test de charge 500 jetons + 500 bulletins en 2 min, Dockerfile et préparation déploiement Scaleway).
 Bloquant / question pour Junior :
 - Pour reprendre demain : démarrer Docker Desktop puis `docker compose up -d db` et `pnpm dev`.
+
+## 2026-11-25 11:48 — Antigravity — J6
+Fait :
+- Implémenté un générateur QR Code ISO/IEC 18004 autonome (`src/lib/qr.ts`, mode UTF-8, niveau M, versions 1–10, zéro dépendance externe / invariant n°8) avec ses tests unitaires (`tests/unit/qr.test.ts` vérifiant les vecteurs BCH ISO 18004 annexes C/D, motifs de repérage, synchronisation et SVG).
+- Construit le **Mode amphi** (`/amphi/[slug]`, `src/components/AmphiDisplay.tsx`) conforme §9/§10 : compteur géant `tabular-nums`, compte à rebours synchronisé sur l'heure de la base, rafraîchissement automatique toutes les 10 s sur `/api/votes/[slug]/participation`, QR code SVG monochrome local (fond blanc fixe pour la lisibilité même en mode sombre), aucun repère de quorum, aucun résultat partiel avant `closes_at` (invariant n°5), liens ajoutés depuis `/votes/[slug]` et `/admin`.
+- Complété la page **« Comment ça marche »** (`/comment-ca-marche`) selon §6.2, §6.7 et §9 : analogie du ticket tamponné sans être lu en 4 étapes, ce qui est stocké / jamais stocké / public à la clôture, perte de l'appareil ou vidage du navigateur, tableau « Garanti / Non garanti en V1 », liens vers `/journal` et `/donnees-personnelles`.
+- Enrichi le **journal public** (`src/lib/journal.ts`, `GET /api/journal`, `/journal`) : résolution des intitulés et liens publics des scrutins publiés et pétitions (sans divulguer les questions des brouillons non publiés, vérifié dans `tests/invariants/votes-lifecycle.test.ts`) et filtres `Toutes · Scrutins · Pétitions`.
+- Créé la page **« Données personnelles »** (`/donnees-personnelles`) conforme §15 RGPD (responsable, finalités et données sensibles, tableau des 7 catégories/natures/durées de conservation, hébergement UE sans traceurs, droits RGPD/CNIL, contact), reliée depuis `/`, `/moi`, `/comment-ca-marche` et `/journal`.
+- Ajouté le test Playwright E2E J6 (`tests/e2e/amphi-and-info-pages.spec.ts` : montée automatique du compteur en mode amphi sans résultat avant l'échéance + vérification des 3 pages d'information).
+- `pnpm lint`, `pnpm typecheck`, `pnpm test` (17 fichiers / 62 tests), `pnpm test:e2e` (4 tests E2E Chromium) et `pnpm build` tous verts.
+Reste :
+- **J7 — Durcissement** : en-têtes/CSP, revue des logs, Playwright complet, test de charge (500 jetons et 500 bulletins en 2 minutes), Dockerfile et préparation déploiement Scaleway.
+Bloquant / question pour Junior :
+- Aucun.
