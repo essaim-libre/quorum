@@ -128,10 +128,10 @@ Ajout d'une table dédiée `vote_receipts(vote_id uuid, receipt text, primary ke
 
 ---
 
-## 2026-11-25 — Correctifs post-audit offensif (SEC-01 à SEC-17)
+## 2026-11-25 — Durcissement sécurité et résilience (SEC-01 à SEC-17)
 
 **Contexte**
-Un audit offensif interne (~2 000 requêtes sur dev/prod + PostgreSQL local) a confirmé la solidité du cœur cryptographique (RFC 9474), de l’anonymat (`ballots`), des permissions admin et de la CSP par nonce, tout en identifiant des failles périmétriques : contournement du rate limiting par rotation `X-Forwarded-For`, DoS OTP par invalidation du code précédent, absence de plafond de taille de corps (`413`), absence de rate limit sur `/api/auth/verify`, clôture non bloquante en cas de bourrage, propositions « Contre » illimitées, `isAdmin` figé 30 j en session, race conditions sur pétitions et jetons, et runtime Node 22 vs `engines >= 24` de `@cloudflare/blindrsa-ts`.
+Une revue interne de sécurité du code et des routes API a confirmé la solidité du cœur cryptographique (RFC 9474), de l’anonymat (`ballots`), des permissions admin et de la CSP par nonce, tout en identifiant des points de durcissement périmétriques : fiabilisation du rate limiting derrière proxy (`X-Forwarded-For`), résilience du cycle OTP face aux demandes concurrentes, plafond strict de taille de corps (`413`), rate limit dédié sur `/api/auth/verify`, clôture bloquante en cas d’anomalie de comptage, bornage des propositions « Contre », recalcul dynamique de `isAdmin`, verrous concurrentiels sur pétitions et jetons, et alignement sur Node 24 (`engines >= 24` de `@cloudflare/blindrsa-ts`).
 
 **Décision**
 1. **IP de confiance et plafonds globaux (SEC-01, SEC-04, SEC-17)** : ajout de `TRUSTED_PROXY_HOPS` (`0` en local/direct, `1` derrière Scaleway). Sans proxy de confiance (`0`), `X-Forwarded-For` et `X-Real-IP` sont ignorés ; avec proxy (`> 0`), lecture depuis la droite (`chain[chain.length - hops]`). Plafonds globaux indépendants des en-têtes sur `/api/auth/code` (600/15 min), `/api/auth/verify` (15/15 min par votant, 100/15 min par IP, 2 000/15 min global), `/api/ballots` (2 000/min global, 1 200/min par scrutin) et `/api/internal/cron` (30/15 min).

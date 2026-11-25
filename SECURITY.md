@@ -26,12 +26,13 @@ Quorum est conçu pour protéger l’anonymat du vote même en cas de fuite de l
 
 ---
 
-## Audit de sécurité
+## Vérifications automatisées et durcissement
 
-Le suivi complet des 17 tickets issus de l’audit offensif (`SEC-01` à `SEC-17`) et leurs tests automatisés de non-régression sont documentés dans :
-- [`docs/security-audit-tickets.md`](docs/security-audit-tickets.md)
-- [`tests/invariants/security-audit-fixes.test.ts`](tests/invariants/security-audit-fixes.test.ts)
+Les invariants de confidentialité, l’isolation de `POST /api/ballots`, la conformité des en-têtes HTTP/CSP par nonce, les plafonds de requêtes (`413`, rate limiting multi-couches) et l’intégrité de clôture sont vérifiés en continu par la CI :
+- [`tests/invariants/anonymous-voting.test.ts`](tests/invariants/anonymous-voting.test.ts)
+- [`tests/invariants/close-and-results.test.ts`](tests/invariants/close-and-results.test.ts)
 - [`tests/invariants/logs-and-security.test.ts`](tests/invariants/logs-and-security.test.ts)
+- [`tests/invariants/security-audit-fixes.test.ts`](tests/invariants/security-audit-fixes.test.ts)
 
 ---
 

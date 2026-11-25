@@ -1,6 +1,6 @@
-# Tickets d’audit de sécurité — Quorum V1
+# Suivi de durcissement sécurité — Quorum V1
 
-Source : audit offensif interne du 25 novembre 2026 (~2 000 requêtes d’attaque sur dev/prod + Postgres local) + revue défensive complémentaire.
+Source : revue de sécurité interne du code et des routes API (25 novembre 2026) + vérifications défensives complémentaires.
 
 ---
 

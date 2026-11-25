@@ -7,7 +7,7 @@
 
 <p>
   <strong>Plateforme web mobile-first de vote étudiant anonyme, vérifiable et auditable.</strong><br />
-  <sub>Pilote conçu pour les 53 900 étudiantes et étudiants de l’Université de Bordeaux · Protocole RFC 9474 (Blind RSA)</sub>
+  <sub>Projet indépendant conçu par des étudiants pour la communauté étudiante de Bordeaux · Protocole RFC 9474 (Blind RSA)</sub>
 </p>
 
 <p>
@@ -18,7 +18,7 @@
   <img src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript Strict" />
   <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL 16" />
   <img src="https://img.shields.io/badge/Crypto-RFC%209474%20Blind%20RSA-6366F1?style=for-the-badge&logo=letsencrypt&logoColor=white" alt="RFC 9474 Blind RSA" />
-  <img src="https://img.shields.io/badge/Audit%20Sécurité-17%2F17%20Corrigées-10B981?style=for-the-badge&logo=shield&logoColor=white" alt="Audit Sécurité 17/17" />
+  <img src="https://img.shields.io/badge/Sécurité-Durcie%20%26%20Vérifiée-10B981?style=for-the-badge&logo=shield&logoColor=white" alt="Sécurité durcie et vérifiée" />
 </p>
 
 <p>
@@ -147,7 +147,7 @@ flowchart LR
 Quorum est gouverné par **11 invariants non négociables**, verrouillés par des **tests bloquants en CI** (`tests/invariants/`), des **triggers PostgreSQL** et des **règles ESLint**.
 
 > [!TIP]
-> L’application a fait l’objet d’un **audit offensif complet** (~2 000 requêtes d’attaque, cycle complet OTP → jeton aveugle → bulletin → clôture → PV). Les **17 tickets identifiés (`SEC-01` à `SEC-17`)** ont tous été corrigés et couverts par des tests de non-régression ([voir le suivi complet](docs/security-audit-tickets.md) et [SECURITY.md](SECURITY.md)).
+> Chaque frontière applicative est durcie et couverte par des tests automatisés : rate limiting multi-couches avec `TRUSTED_PROXY_HOPS`, plafonds stricts de taille JSON (`413`), défense CSRF (`Origin` / `Sec-Fetch-Site`), contrôle d’intégrité bloquant à la clôture et verrous transactionnels PostgreSQL ([détails dans SECURITY.md](SECURITY.md)).
 
 | Métrique de vérification | État | Détail |
 |---|---|---|
@@ -238,13 +238,12 @@ pnpm dev
 |---|---|
 | 📘 [docs/cahier-technique.md](docs/cahier-technique.md) | Source de vérité : produit, protocole cryptographique, schéma SQL, design system, RGPD |
 | 🛡️ [SECURITY.md](SECURITY.md) | Modèle de menace, garanties V1 vs limites, invariants et signalement de vulnérabilité |
-| 🔎 [docs/security-audit-tickets.md](docs/security-audit-tickets.md) | Suivi détaillé de l’audit offensif (`SEC-01` à `SEC-17`) |
 | ☁️ [docs/deploiement-scaleway.md](docs/deploiement-scaleway.md) | Guide de mise en production conteneurisée (Scaleway, HTTPS, cron, logs) |
 | 🧭 [docs/decisions.md](docs/decisions.md) | Journal des décisions techniques et d’architecture |
-| 📝 [docs/JOURNAL.md](docs/JOURNAL.md) | Historique complet d’avancement jalon par jalon (J0 → J7 + audit) |
+| 📝 [docs/JOURNAL.md](docs/JOURNAL.md) | Historique complet d’avancement jalon par jalon (J0 → J7) |
 
 ---
 
 <div align="center">
-  <sub>Construit avec exigence cryptographique et sobriété · <strong>Quorum</strong> — Université de Bordeaux</sub>
+  <sub>Projet indépendant conçu par des étudiants, non affilié à l’Université de Bordeaux · <strong>Quorum</strong></sub>
 </div>

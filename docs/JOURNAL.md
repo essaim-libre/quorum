@@ -146,7 +146,7 @@ Fait :
 - Mis à jour `docs/decisions.md` et `docs/cahier-technique.md` (§8 et §16 : **J0 à J7 tous cochés**).
 - Vérifications finales : `pnpm lint`, `pnpm typecheck`, `pnpm test` (18 fichiers / 66 tests), `pnpm test:load` (30,41 s < 120 s), `pnpm test:e2e` (5 suites Chromium) et `pnpm build` tous verts.
 Reste :
-- Points organisationnels hors code avant lancement pilote (§15, §17) : vérification des alias `@etu.u-bordeaux.fr`, test de délivrabilité email sur boîtes étudiantes, désactivation/minimisation des logs IP côté plateforme Scaleway, structure porteuse (association loi 1901) et documentation du niveau de risque CNIL (délibération n° 2026-045) dans `docs/decisions.md`.
+- Points organisationnels hors code avant mise en ligne (§15, §17) : vérification des alias `@etu.u-bordeaux.fr`, test de délivrabilité email sur boîtes étudiantes, désactivation/minimisation des logs IP côté plateforme Scaleway, structure porteuse (association loi 1901) et documentation du niveau de risque CNIL (délibération n° 2026-045) dans `docs/decisions.md`.
 Bloquant / question pour Junior :
 - Aucun bloquant technique : tous les jalons V1 (J0 à J7) sont terminés et verts.
 
@@ -158,13 +158,13 @@ Fait :
 - Ajouté la vérification E2E du passage `data-condensed="false" → "true"` au scroll dans `tests/e2e/hardening-and-csp.spec.ts`.
 - `pnpm lint`, `pnpm typecheck`, `pnpm test` (18 fichiers / 66 tests), `pnpm build` et `pnpm test:e2e` (5 suites Chromium) tous verts.
 Reste :
-- Points organisationnels hors code avant ouverture pilote (§15, §17).
+- Points organisationnels hors code avant mise en ligne (§15, §17).
 Bloquant / question pour Junior :
 - Aucun.
 
-## 2026-11-25 18:15 — Antigravity — Correctifs d'audit de sécurité offensif (SEC-01 à SEC-17)
+## 2026-11-25 18:15 — Antigravity — Durcissement sécurité et résilience (SEC-01 à SEC-17)
 Fait :
-- Créé le suivi des 17 tickets d'audit dans `docs/security-audit-tickets.md` et consigné les décisions dans `docs/decisions.md` + `docs/cahier-technique.md` (§12) + `docs/deploiement-scaleway.md`.
+- Créé le suivi des 17 mesures de durcissement dans `docs/security-audit-tickets.md` et consigné les décisions dans `docs/decisions.md` + `docs/cahier-technique.md` (§12) + `docs/deploiement-scaleway.md`.
 - **P1 — SEC-01 (XFF / rate limiting global)** : ajouté `TRUSTED_PROXY_HOPS` (`0` par défaut en local/direct -> ignore `X-Forwarded-For` / `X-Real-IP` ; `> 0` -> lit depuis la droite `chain[chain.length - hops]`) et plafonds globaux indépendants des en-têtes (`/api/auth/code` 600/15 min, `/api/ballots` 2 000/min global + 1 200/min par scrutin).
 - **P1 — SEC-02 (DoS OTP)** : `verifyOtpCode` accepte désormais tout code actif (non consommé, non expiré, < 5 essais) en temps constant pour qu'un attaquant ne puisse plus invalider le code reçu par un étudiant.
 - **P2 — SEC-03 (limite 413)** : créé `src/lib/http/body.ts` (`readJsonBodyWithLimit`, contrôle `Content-Length` + flux borné en octets -> `413 payload_too_large`, 4 Ko auth/token/ballots, 16 Ko pétitions/admin) appliqué sur toutes les routes `POST`/`PATCH`.
@@ -172,10 +172,10 @@ Fait :
 - **P2 — SEC-05 (clôture bloquante)** : `closeVoteIfDue` refuse d'écrire `results` si `totalBallots > tokensIssued`, efface `private_key_enc` et publie `vote.integrity_alert` dans `admin_journal`.
 - **P3 — SEC-07 à SEC-12** : plafond « Contre » (2/étudiant/pétition, 50/pétition + `pg_advisory_xact_lock` + mention « Proposition étudiante » + rate limit 20/15 min) ; recalcul dynamique de `isAdmin` à chaque requête + TTL session admin ramené à 24 h ; verrou `pg_advisory_xact_lock` + migration `drizzle/0003_petitions_active_unique.sql` (index unique partiel) ; rejet `..` et bordures dans `email.ts` ; interception `23505` sur `emargement` (retour `200`/`409` sans `500`) ; en-têtes `Cache-Control: private, no-store` / `no-store`.
 - **P4 — SEC-13 à SEC-17** : passage à Node 24 (`Dockerfile` + CI), refus `MAIL_DRIVER=console` hors `localhost`, défense CSRF `Origin`/`Sec-Fetch-Site` (`src/lib/http/csrf.ts`), bornage des listes (`limit 200`), `VACUUM emargement` réservé au cron et rate limit sur `/api/internal/cron`.
-- Ajouté les tests offensifs de non-régression dans `tests/invariants/security-audit-fixes.test.ts` et enrichi `tests/e2e/hardening-and-csp.spec.ts` (413, Cache-Control, CSRF cross-origin).
+- Ajouté les tests de non-régression sécurité dans `tests/invariants/security-audit-fixes.test.ts` et enrichi `tests/e2e/hardening-and-csp.spec.ts` (413, Cache-Control, CSRF cross-origin).
 - `pnpm lint`, `pnpm typecheck`, `pnpm test` (19 fichiers / 76 tests), `pnpm build` et `pnpm test:e2e` (5 suites Chromium) tous verts.
 Reste :
-- Points organisationnels hors code avant ouverture pilote (§15, §17).
+- Points organisationnels hors code avant mise en ligne (§15, §17).
 Bloquant / question pour Junior :
 - Aucun.
 

@@ -3,8 +3,8 @@ export const copy = {
     name: "quorum",
     title: "Quorum",
     tagline:
-      "Les votes de ton université. Une voix par étudiant inscrit, vote anonyme, résultats publics à la clôture.",
-    institution: "Université de Bordeaux",
+      "Plateforme étudiante indépendante de vote anonyme. Une voix par étudiant inscrit, résultats publics à la clôture.",
+    institution: "Initiative étudiante indépendante · Bordeaux",
   },
   nav: {
     votes: "Votes",
@@ -446,7 +446,7 @@ export const copy = {
       "Quorum applique la minimisation des données dès la conception : l’adresse universitaire ne sert qu’à vérifier ton appartenance à l’université et à éviter les doubles votes.",
     controllerTitle: "Responsable de traitement",
     controllerBody:
-      "Projet pilote Quorum — Université de Bordeaux. La structure porteuse définitive (association loi 1901) et son nom de domaine officiel seront renseignés ici avant toute ouverture publique générale.",
+      "Quorum est une plateforme indépendante conçue par des étudiants, sans affiliation institutionnelle avec l’Université de Bordeaux. La structure porteuse (association loi 1901) et son nom de domaine officiel seront précisés ici lors de la mise en ligne.",
     purposeTitle: "Finalités et données sensibles",
     purposeBody:
       "Quorum permet d’organiser des consultations étudiantes anonymes et des pétitions sur la vie de campus. Parce que certaines questions peuvent révéler des opinions politiques ou syndicales, aucun lien technique n’est conservé entre ton identité et ton bulletin de vote (signatures aveugles RFC 9474).",
