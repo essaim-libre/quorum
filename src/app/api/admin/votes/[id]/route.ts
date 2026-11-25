@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
+import { MAX_STANDARD_JSON_BYTES, readJsonBodyWithLimit } from "@/lib/http/body";
+import {
+  isTrustedSameOriginRequest,
+  PRIVATE_NO_STORE_HEADERS,
+} from "@/lib/http/csrf";
 import { log } from "@/lib/log";
 import { updateVoteDraftSchema } from "@/lib/votes/rules";
 import { updateVoteDraft } from "@/lib/votes/service";
@@ -12,30 +17,52 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
+  if (!isTrustedSameOriginRequest(request)) {
+    return NextResponse.json(
+      { error: "forbidden" },
+      { status: 403, headers: PRIVATE_NO_STORE_HEADERS },
+    );
+  }
+
   const session = await getCurrentSession();
   if (!session) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "unauthorized" },
+      { status: 401, headers: PRIVATE_NO_STORE_HEADERS },
+    );
   }
   if (!session.isAdmin) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    return NextResponse.json(
+      { error: "forbidden" },
+      { status: 403, headers: PRIVATE_NO_STORE_HEADERS },
+    );
   }
 
   const { id } = await context.params;
   const parsedId = uuidSchema.safeParse(id);
   if (!parsedId.success) {
-    return NextResponse.json({ error: "not_found" }, { status: 404 });
+    return NextResponse.json(
+      { error: "not_found" },
+      { status: 404, headers: PRIVATE_NO_STORE_HEADERS },
+    );
   }
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "invalid_request" }, { status: 400 });
+  const bodyRes = await readJsonBodyWithLimit(request, {
+    maxBytes: MAX_STANDARD_JSON_BYTES,
+  });
+  if (!bodyRes.ok) {
+    return NextResponse.json(
+      { error: bodyRes.error },
+      { status: bodyRes.status, headers: PRIVATE_NO_STORE_HEADERS },
+    );
   }
 
-  const parsedBody = updateVoteDraftSchema.safeParse(body);
+  const parsedBody = updateVoteDraftSchema.safeParse(bodyRes.data);
   if (!parsedBody.success) {
-    return NextResponse.json({ error: "invalid_request" }, { status: 400 });
+    return NextResponse.json(
+      { error: "invalid_request" },
+      { status: 400, headers: PRIVATE_NO_STORE_HEADERS },
+    );
   }
 
   try {
@@ -47,12 +74,21 @@ export async function PATCH(
           : result.error === "invalid_duration"
             ? 400
             : 409;
-      return NextResponse.json({ error: result.error }, { status });
+      return NextResponse.json(
+        { error: result.error },
+        { status, headers: PRIVATE_NO_STORE_HEADERS },
+      );
     }
-    return NextResponse.json(result.data, { status: 200 });
+    return NextResponse.json(result.data, {
+      status: 200,
+      headers: PRIVATE_NO_STORE_HEADERS,
+    });
   } catch (error: unknown) {
     const reason = error instanceof Error ? error.message : "unknown";
     log("error", "admin.votes.update.failed", { reason });
-    return NextResponse.json({ error: "internal_error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "internal_error" },
+      { status: 500, headers: PRIVATE_NO_STORE_HEADERS },
+    );
   }
 }

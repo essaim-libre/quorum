@@ -20,6 +20,7 @@ describe("invariants SQL — migrations Drizzle et triggers (§7)", () => {
     expect(tags).toContain("0000_initial_schema");
     expect(tags).toContain("0001_triggers_and_pgcrypto");
     expect(tags).toContain("0002_vote_receipts");
+    expect(tags).toContain("0003_petitions_active_unique");
 
     for (const tag of tags) {
       const sqlContent = readFileSync(

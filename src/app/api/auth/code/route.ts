@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requestOtpCode } from "@/lib/auth/otp";
 import { getDb } from "@/lib/db/client";
+import { MAX_SMALL_JSON_BYTES, readJsonBodyWithLimit } from "@/lib/http/body";
+import { PRIVATE_NO_STORE_HEADERS } from "@/lib/http/csrf";
 import { log } from "@/lib/log";
 import { extractClientIp } from "@/lib/ratelimit";
 
@@ -10,16 +12,22 @@ const requestCodeBodySchema = z.object({
 });
 
 export async function POST(request: Request): Promise<NextResponse> {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "invalid_request" }, { status: 400 });
+  const bodyRes = await readJsonBodyWithLimit(request, {
+    maxBytes: MAX_SMALL_JSON_BYTES,
+  });
+  if (!bodyRes.ok) {
+    return NextResponse.json(
+      { error: bodyRes.error },
+      { status: bodyRes.status, headers: PRIVATE_NO_STORE_HEADERS },
+    );
   }
 
-  const parsed = requestCodeBodySchema.safeParse(body);
+  const parsed = requestCodeBodySchema.safeParse(bodyRes.data);
   if (!parsed.success) {
-    return NextResponse.json({ error: "invalid_email" }, { status: 400 });
+    return NextResponse.json(
+      { error: "invalid_email" },
+      { status: 400, headers: PRIVATE_NO_STORE_HEADERS },
+    );
   }
 
   try {
@@ -35,20 +43,29 @@ export async function POST(request: Request): Promise<NextResponse> {
           { error: "rate_limited" },
           {
             status: 429,
-            headers: { "Retry-After": String(result.retryAfterSeconds) },
+            headers: {
+              ...PRIVATE_NO_STORE_HEADERS,
+              "Retry-After": String(result.retryAfterSeconds),
+            },
           },
         );
       }
-      return NextResponse.json({ error: result.error }, { status: 400 });
+      return NextResponse.json(
+        { error: result.error },
+        { status: 400, headers: PRIVATE_NO_STORE_HEADERS },
+      );
     }
 
     return NextResponse.json(
       result.devCode ? { ok: true, devCode: result.devCode } : { ok: true },
-      { status: 200 },
+      { status: 200, headers: PRIVATE_NO_STORE_HEADERS },
     );
   } catch (error: unknown) {
     const code = error instanceof Error ? error.message : "unknown";
     log("error", "auth.code.failed", { reason: code });
-    return NextResponse.json({ error: "internal_error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "internal_error" },
+      { status: 500, headers: PRIVATE_NO_STORE_HEADERS },
+    );
   }
 }

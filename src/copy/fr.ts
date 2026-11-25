@@ -163,6 +163,7 @@ export const copy = {
       "vote.update": "Modification d’un brouillon",
       "vote.publish": "Publication d’un scrutin",
       "vote.cancel": "Annulation d’un scrutin",
+      "vote.integrity_alert": "Alerte d’intégrité (clôture bloquée)",
       "petition.approve": "Approbation d’une pétition",
       "petition.auto_approve": "Publication automatique (48 h)",
       "petition.request_changes": "Demande de reformulation",
@@ -236,6 +237,7 @@ export const copy = {
     contreEmpty: "Aucun argument contre n’a été déposé pour le moment.",
     contreTextLabel: "Ton argument Contre (600 caractères max.)",
     contreAuthorLabel: "Signature libre (ex. « Anonyme », « Étudiants L2 »)",
+    contreStudentPrefix: "Proposition étudiante · ",
     contreSubmit: "Déposer cet argument Contre",
     supportAction: "Soutenir",
     supportedAction: "Soutenu",
@@ -508,6 +510,7 @@ export const copy = {
   errors: {
     internal_error: "Une erreur interne est survenue. Réessaie dans un instant.",
     invalid_request: "Les données envoyées ne sont pas valides.",
+    payload_too_large: "La requête dépasse la taille maximale autorisée.",
     invalid_email:
       "Utilise une adresse @etu.u-bordeaux.fr valide, sans signe « + ».",
     invalid_code:
@@ -539,6 +542,10 @@ export const copy = {
       "Tu as atteint la limite de 3 pétitions déposées ce mois-ci.",
     petition_not_collecting:
       "Cette pétition n’est plus ouverte aux signatures.",
+    contre_limit_reached:
+      "La limite de propositions « Contre » est atteinte pour cette pétition.",
+    integrity_violation:
+      "Clôture bloquée suite à une anomalie d’intégrité (consignée au journal public).",
     invalid_state: "Cette action n’est pas possible dans l’état actuel de la pétition.",
     invalid_opens_at:
       "La date d’ouverture doit être fixée au plus tard 24 heures après l’approbation.",

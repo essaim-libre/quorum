@@ -376,6 +376,11 @@ export async function createPetition(params: {
   const authorTag = computeAuthorTag(params.voterId);
 
   return params.db.transaction(async (tx) => {
+    // SEC-09 : verrou transactionnel par auteur pour sérialiser les créations concurrentes
+    await tx.execute(
+      sql`SELECT pg_advisory_xact_lock(hashtext('petition:author:' || ${authorTag.toString("hex")}))`,
+    );
+
     // Expire d'abord les pétitions dépassées de cet auteur
     await tx
       .update(petitions)
@@ -524,7 +529,8 @@ export async function listPetitions(
     })
     .from(petitions)
     .where(inArray(petitions.state, states))
-    .orderBy(desc(petitions.signaturesCount), asc(petitions.collectUntil));
+    .orderBy(desc(petitions.signaturesCount), asc(petitions.collectUntil))
+    .limit(200);
 
   return rows.map((row) => ({
     id: row.id,
@@ -752,6 +758,9 @@ export async function signPetition(params: {
   });
 }
 
+export const MAX_CONTRE_PER_VOTER_PER_PETITION = 2;
+export const MAX_CONTRE_PER_PETITION = 50;
+
 export async function addContreProposal(params: {
   readonly db: Database;
   readonly slug: string;
@@ -761,7 +770,10 @@ export async function addContreProposal(params: {
   | { readonly ok: true; readonly proposal: PublicContreProposal }
   | {
       readonly ok: false;
-      readonly error: "not_found" | "petition_not_collecting";
+      readonly error:
+        | "not_found"
+        | "petition_not_collecting"
+        | "contre_limit_reached";
     }
 > {
   return params.db.transaction(async (tx) => {
@@ -783,13 +795,43 @@ export async function addContreProposal(params: {
       return { ok: false, error: "petition_not_collecting" } as const;
     }
 
+    // SEC-07 : verrou + plafonds par étudiant (2) et par pétition (50)
+    await tx.execute(
+      sql`SELECT pg_advisory_xact_lock(hashtext('petition:contre:' || ${petition.id}))`,
+    );
+
+    const authorTag = computeContreAuthorTag(params.voterId, petition.id);
+
+    const [totalRows, authorRows] = await Promise.all([
+      tx
+        .select({ total: sql<number>`count(*)::int` })
+        .from(contreProposals)
+        .where(eq(contreProposals.petitionId, petition.id)),
+      tx
+        .select({ total: sql<number>`count(*)::int` })
+        .from(contreProposals)
+        .where(
+          and(
+            eq(contreProposals.petitionId, petition.id),
+            eq(contreProposals.authorTag, authorTag),
+          ),
+        ),
+    ]);
+
+    if (
+      Number(totalRows[0]?.total ?? 0) >= MAX_CONTRE_PER_PETITION ||
+      Number(authorRows[0]?.total ?? 0) >= MAX_CONTRE_PER_VOTER_PER_PETITION
+    ) {
+      return { ok: false, error: "contre_limit_reached" } as const;
+    }
+
     const inserted = await tx
       .insert(contreProposals)
       .values({
         petitionId: petition.id,
         text: params.input.text,
         authorLabel: params.input.authorLabel,
-        authorTag: computeContreAuthorTag(params.voterId, petition.id),
+        authorTag,
       })
       .returning();
 

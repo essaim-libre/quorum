@@ -125,3 +125,22 @@ Ajout d'une table dédiée `vote_receipts(vote_id uuid, receipt text, primary ke
 - Zéro violation CSP et zéro `'unsafe-inline'` sur `script-src` vérifiés sous Chromium.
 - Le test de charge (`pnpm test:load`) exécute 500 jetons aveugles + 500 bulletins anonymes en ~30,4 s (budget max : 120 s) sans bloquer la boucle principale Next.js.
 - Zéro dépendance supplémentaire ajoutée.
+
+---
+
+## 2026-11-25 — Correctifs post-audit offensif (SEC-01 à SEC-17)
+
+**Contexte**
+Un audit offensif interne (~2 000 requêtes sur dev/prod + PostgreSQL local) a confirmé la solidité du cœur cryptographique (RFC 9474), de l’anonymat (`ballots`), des permissions admin et de la CSP par nonce, tout en identifiant des failles périmétriques : contournement du rate limiting par rotation `X-Forwarded-For`, DoS OTP par invalidation du code précédent, absence de plafond de taille de corps (`413`), absence de rate limit sur `/api/auth/verify`, clôture non bloquante en cas de bourrage, propositions « Contre » illimitées, `isAdmin` figé 30 j en session, race conditions sur pétitions et jetons, et runtime Node 22 vs `engines >= 24` de `@cloudflare/blindrsa-ts`.
+
+**Décision**
+1. **IP de confiance et plafonds globaux (SEC-01, SEC-04, SEC-17)** : ajout de `TRUSTED_PROXY_HOPS` (`0` en local/direct, `1` derrière Scaleway). Sans proxy de confiance (`0`), `X-Forwarded-For` et `X-Real-IP` sont ignorés ; avec proxy (`> 0`), lecture depuis la droite (`chain[chain.length - hops]`). Plafonds globaux indépendants des en-têtes sur `/api/auth/code` (600/15 min), `/api/auth/verify` (15/15 min par votant, 100/15 min par IP, 2 000/15 min global), `/api/ballots` (2 000/min global, 1 200/min par scrutin) et `/api/internal/cron` (30/15 min).
+2. **Cycle OTP résilient au DoS (SEC-02)** : `verifyOtpCode` accepte tout code actif (non consommé, non expiré, < 5 essais) en comparaison temps constant, afin qu’un attaquant ne puisse pas invalider le code reçu par un étudiant.
+3. **Plafond de taille JSON `413` (SEC-03)** : helper `readJsonBodyWithLimit` (4 Ko auth/token/ballots, 16 Ko pétitions/admin) contrôlant `Content-Length` et la lecture en flux.
+4. **Clôture bloquante en cas d’anomalie d’intégrité (SEC-05)** : si `totalBallots > tokensIssued`, la clé privée est effacée, un incident public `vote.integrity_alert` est consigné dans `admin_journal`, et les résultats ne sont pas publiés.
+5. **Pétitions, sessions admin et concurrences (SEC-07 à SEC-12)** : plafond « Contre » à 2 par étudiant et 50 par pétition + mention « Proposition étudiante » ; recalcul dynamique de `isAdmin` à chaque requête et TTL admin ramené à 24 h ; verrou transactionnel `pg_advisory_xact_lock` + index unique partiel (`drizzle/0003_petitions_active_unique.sql`) ; rejet des points consécutifs (`..`) dans les emails ; interception `23505` sur `emargement` (retour `200`/`409` sans `500`) ; en-têtes `Cache-Control: private, no-store` / `no-store`.
+6. **Durcissement complémentaire (SEC-13 à SEC-16)** : passage à Node 24 (`Dockerfile` + CI), refus de `MAIL_DRIVER=console` hors `localhost`, vérification `Origin`/`Sec-Fetch-Site` sur les mutations authentifiées par cookie, bornage des listes (`limit 200`) et `VACUUM emargement` réservé au cron.
+7. **Revote (SEC-06)** : le revote jusqu’à 20 révisions (§2.3) est maintenu tel que défini au cahier technique pour protéger contre la pression de groupe en AG ; le compromis face à la cession volontaire du jeton est assumé et documenté.
+
+**Conséquence**
+Surface d’attaque DoS, mail-bombing, spam et race conditions verrouillée sans aucune dépendance supplémentaire et sans compromettre les 11 invariants de confidentialité.

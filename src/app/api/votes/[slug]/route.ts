@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getDb, getPool } from "@/lib/db/client";
+import { PUBLIC_NO_STORE_HEADERS } from "@/lib/http/csrf";
 import { log } from "@/lib/log";
 import { getClosedVoteReportBySlug } from "@/lib/votes/close";
 import { getPublishedVoteBySlug } from "@/lib/votes/service";
@@ -31,12 +32,24 @@ export async function GET(
 
     // Invariant n°5 : aucun champ de résultats avant closes_at.
     if (data.vote.status !== "closed") {
-      return NextResponse.json(data, { status: 200 });
+      return NextResponse.json(data, {
+        status: 200,
+        headers: PUBLIC_NO_STORE_HEADERS,
+      });
     }
 
     const closed = await getClosedVoteReportBySlug(db, getPool(), parsed.data);
     if (!closed.ok) {
-      return NextResponse.json(data, { status: 200 });
+      if (closed.error === "integrity_violation") {
+        return NextResponse.json(
+          { error: "integrity_violation" },
+          { status: 409, headers: PUBLIC_NO_STORE_HEADERS },
+        );
+      }
+      return NextResponse.json(data, {
+        status: 200,
+        headers: PUBLIC_NO_STORE_HEADERS,
+      });
     }
 
     return NextResponse.json(
@@ -48,7 +61,7 @@ export async function GET(
           receiptsHash: closed.report.receiptsHash,
         },
       },
-      { status: 200 },
+      { status: 200, headers: PUBLIC_NO_STORE_HEADERS },
     );
   } catch (error: unknown) {
     const reason = error instanceof Error ? error.message : "unknown";

@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import { and, eq, gt } from "drizzle-orm";
 import { cookies } from "next/headers";
 import type { NextResponse } from "next/server";
+import { isAdminVoterId } from "@/lib/auth/admin";
 import { now } from "@/lib/clock";
 import { sha256 } from "@/lib/crypto/hmac";
 import { type Database, getDb } from "@/lib/db/client";
@@ -10,7 +11,9 @@ import { sessions } from "@/lib/db/schema";
 
 export const SESSION_COOKIE_NAME = "__Host-quorum_session";
 export const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
+export const ADMIN_SESSION_TTL_SECONDS = 24 * 60 * 60; // SEC-08 : TTL réduit à 24 h pour les sessions admin
 const SESSION_TTL_MS = SESSION_TTL_SECONDS * 1000;
+const ADMIN_SESSION_TTL_MS = ADMIN_SESSION_TTL_SECONDS * 1000;
 
 export interface SessionData {
   readonly voterId: Buffer;
@@ -48,7 +51,8 @@ export async function createSessionRecord(
   isAdmin: boolean,
 ): Promise<{ rawToken: string; expiresAt: Date }> {
   const { rawToken, tokenHash } = generateSessionToken();
-  const expiresAt = new Date(now().getTime() + SESSION_TTL_MS);
+  const ttlMs = isAdmin ? ADMIN_SESSION_TTL_MS : SESSION_TTL_MS;
+  const expiresAt = new Date(now().getTime() + ttlMs);
 
   await db.insert(sessions).values({
     tokenHash,
@@ -73,7 +77,6 @@ export async function findActiveSession(
   const rows = await db
     .select({
       voterId: sessions.voterId,
-      isAdmin: sessions.isAdmin,
       expiresAt: sessions.expiresAt,
     })
     .from(sessions)
@@ -90,9 +93,13 @@ export async function findActiveSession(
     return null;
   }
 
+  // SEC-08 : recalcul dynamique de isAdmin à chaque requête depuis ADMIN_EMAILS courant
+  // (retirer une adresse de ADMIN_EMAILS révoque immédiatement les droits admin).
+  const isAdmin = isAdminVoterId(row.voterId);
+
   return {
     voterId: row.voterId,
-    isAdmin: row.isAdmin,
+    isAdmin,
     expiresAt: row.expiresAt,
     tokenHashHex: tokenHash.toString("hex"),
   };
@@ -109,16 +116,24 @@ export async function deleteSessionByToken(
   await db.delete(sessions).where(eq(sessions.tokenHash, tokenHash));
 }
 
+export async function revokeAllSessionsForVoter(
+  db: Database,
+  voterId: Buffer,
+): Promise<void> {
+  await db.delete(sessions).where(eq(sessions.voterId, voterId));
+}
+
 export function setSessionCookieOnResponse(
   response: NextResponse,
   rawToken: string,
+  isAdmin = false,
 ): void {
   response.cookies.set(SESSION_COOKIE_NAME, rawToken, {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
     path: "/",
-    maxAge: SESSION_TTL_SECONDS,
+    maxAge: isAdmin ? ADMIN_SESSION_TTL_SECONDS : SESSION_TTL_SECONDS,
   });
 }
 

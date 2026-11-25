@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db/client";
+import { PUBLIC_NO_STORE_HEADERS } from "@/lib/http/csrf";
 import { log } from "@/lib/log";
 import { voteListViewSchema } from "@/lib/votes/rules";
 import { listPublishedVotes } from "@/lib/votes/service";
@@ -10,15 +11,24 @@ export async function GET(request: Request): Promise<NextResponse> {
   const parsedView = voteListViewSchema.safeParse(rawView);
 
   if (!parsedView.success) {
-    return NextResponse.json({ error: "invalid_request" }, { status: 400 });
+    return NextResponse.json(
+      { error: "invalid_request" },
+      { status: 400, headers: PUBLIC_NO_STORE_HEADERS },
+    );
   }
 
   try {
     const data = await listPublishedVotes(getDb(), parsedView.data);
-    return NextResponse.json(data, { status: 200 });
+    return NextResponse.json(data, {
+      status: 200,
+      headers: PUBLIC_NO_STORE_HEADERS,
+    });
   } catch (error: unknown) {
     const reason = error instanceof Error ? error.message : "unknown";
     log("error", "votes.list.failed", { reason });
-    return NextResponse.json({ error: "internal_error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "internal_error" },
+      { status: 500, headers: PUBLIC_NO_STORE_HEADERS },
+    );
   }
 }

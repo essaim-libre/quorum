@@ -6,9 +6,17 @@ export function normalizeEmail(raw: string): string {
   return raw.trim().toLowerCase();
 }
 
+/**
+ * Regex stricte pour la partie locale (SEC-10) :
+ * - interdit le `+` (sous-adresses),
+ * - interdit les points consécutifs (`..`),
+ * - interdit les `.`, `-` ou `_` en début ou en fin de partie locale.
+ */
 export function buildAllowedEmailRegex(allowedDomain: string): RegExp {
   const domain = allowedDomain.trim().toLowerCase();
-  return new RegExp(`^[a-z0-9][a-z0-9._-]*@${escapeRegExp(domain)}$`);
+  return new RegExp(
+    `^(?:[a-z0-9]|[a-z0-9](?:[a-z0-9_-]|\\.(?!\\.))*[a-z0-9])@${escapeRegExp(domain)}$`,
+  );
 }
 
 export function isValidStudentEmail(

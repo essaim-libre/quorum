@@ -206,7 +206,8 @@ export async function listPublishedVotes(
     })
     .from(votes)
     .where(condition)
-    .orderBy(orderBy);
+    .orderBy(orderBy)
+    .limit(200);
 
   const ballotCounts = await countBallotsByVoteIds(
     db,
@@ -368,7 +369,8 @@ export async function listAdminVotes(db: Database): Promise<AdminVoteSummary[]> 
       cancelReason: votes.cancelReason,
     })
     .from(votes)
-    .orderBy(desc(votes.opensAt), asc(votes.slug));
+    .orderBy(desc(votes.opensAt), asc(votes.slug))
+    .limit(200);
 
   if (rows.length === 0) {
     return [];

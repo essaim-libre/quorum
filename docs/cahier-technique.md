@@ -599,6 +599,7 @@ ADMIN_EMAILS=                       # liste séparée par des virgules
 ELECTORATE_SIZE=56000               # chiffre communiqué par l'université, à mettre à jour chaque année
 PETITION_THRESHOLD=300
 PETITION_COLLECT_DAYS=7
+TRUSTED_PROXY_HOPS=0                # 0 en local/direct, 1 derrière Scaleway Serverless Containers
 
 MAIL_DRIVER=console                 # console (dev) | scaleway (prod)
 MAIL_FROM=Quorum <code@exemple.fr>

@@ -3,6 +3,19 @@ import { z } from "zod";
 
 const BASE64_PATTERN = /^[A-Za-z0-9+/]+={0,2}$/;
 
+export function isLocalhostUrl(rawUrl: string): boolean {
+  try {
+    const parsed = new URL(rawUrl);
+    return (
+      parsed.hostname === "localhost" ||
+      parsed.hostname === "127.0.0.1" ||
+      parsed.hostname === "[::1]"
+    );
+  } catch {
+    return false;
+  }
+}
+
 function decodeSecretKey(raw: string): Buffer | null {
   const trimmed = raw.trim();
   if (trimmed.length === 0 || trimmed.length % 4 !== 0) {
@@ -70,6 +83,10 @@ const rawEnvSchema = z
     PETITION_THRESHOLD: z.coerce.number().int().positive().default(300),
     PETITION_COLLECT_DAYS: z.coerce.number().int().positive().default(7),
 
+    // Nombre de reverse-proxies de confiance devant l'application (SEC-01).
+    // 0 en direct/dev (ignore les en-têtes proxy), 1 derrière Scaleway Serverless Containers.
+    TRUSTED_PROXY_HOPS: z.coerce.number().int().min(0).max(10).default(0),
+
     MAIL_DRIVER: z.enum(["console", "scaleway"]).default("console"),
     MAIL_FROM: z.string().trim().min(1),
     SCW_SECRET_KEY: z.string().trim().optional().default(""),
@@ -106,6 +123,16 @@ const rawEnvSchema = z
         code: "custom",
         path: ["MAIL_DRIVER"],
         message: "MAIL_DRIVER=console est refusé en production.",
+      });
+    }
+
+    // SEC-14 : refuse MAIL_DRIVER=console hors localhost même si NODE_ENV n'est pas production
+    if (env.MAIL_DRIVER === "console" && !isLocalhostUrl(env.APP_URL)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["MAIL_DRIVER"],
+        message:
+          "MAIL_DRIVER=console est autorisé uniquement lorsque APP_URL pointe vers localhost.",
       });
     }
 

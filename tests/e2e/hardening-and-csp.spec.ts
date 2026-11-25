@@ -123,6 +123,29 @@ test.describe("durcissement J7 — en-têtes HTTP, CSP par nonce, zéro tiers et
 
     expect(resWithCookie.status()).toBe(resWithoutCookie.status());
     expect(await resWithCookie.json()).toEqual(await resWithoutCookie.json());
+
+    // 5. Correctifs d'audit SEC-03 (413), SEC-12 (Cache-Control) et SEC-15 (CSRF Origin)
+    const oversizedRes = await request.post("/api/ballots", {
+      data: { padding: "x".repeat(8000) },
+    });
+    expect(oversizedRes.status()).toBe(413);
+    expect(await oversizedRes.json()).toEqual({ error: "payload_too_large" });
+
+    const adminListRes = await adminContext.request.get("/api/admin/votes");
+    expect(adminListRes.status()).toBe(200);
+    expect(adminListRes.headers()["cache-control"]).toBe("private, no-store");
+
+    const crossOriginAdminRes = await adminContext.request.post(
+      "/api/admin/votes",
+      {
+        headers: {
+          Origin: "https://evil.example",
+          "Sec-Fetch-Site": "cross-site",
+        },
+        data: { question: "Cross site ?" },
+      },
+    );
+    expect(crossOriginAdminRes.status()).toBe(403);
     await adminContext.close();
   });
 });

@@ -17,8 +17,9 @@ echo "CRON_SECRET=$(openssl rand -hex 32)"
 
 Vérifications obligatoires avant déploiement :
 - `NODE_ENV=production`
-- `MAIL_DRIVER=scaleway` (`console` est refusé au démarrage en production)
+- `MAIL_DRIVER=scaleway` (`console` est refusé au démarrage en production et hors `localhost`)
 - `APP_URL=https://<domaine-officiel>`
+- `TRUSTED_PROXY_HOPS=1` (indispensable derrière le reverse-proxy Scaleway pour que le rate limiting lise l’IP réelle ajoutée par le proxy et jamais un `X-Forwarded-For` falsifié)
 - `ELECTORATE_SIZE=56000` (à actualiser à chaque rentrée universitaire)
 - `ADMIN_EMAILS=<liste-virgules@etu.u-bordeaux.fr>`
 

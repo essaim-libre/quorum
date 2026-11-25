@@ -236,6 +236,7 @@ export function PetitionDetailClient({
                   </p>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <span className="text-mono-xs text-ink-2">
+                      {copy.petitions.contreStudentPrefix}
                       {copy.votes.signedBy(prop.authorLabel)} ·{" "}
                       {copy.petitions.supportsCount(prop.supports)}
                     </span>

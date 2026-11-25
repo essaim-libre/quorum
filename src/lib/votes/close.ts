@@ -13,6 +13,7 @@ import {
   votes,
 } from "@/lib/db/schema";
 import { getEnv } from "@/lib/env";
+import { recordAdminAction } from "@/lib/journal";
 import { log } from "@/lib/log";
 import {
   computeReceiptsListHash,
@@ -23,6 +24,7 @@ import {
 export interface CloseVoteOutcome {
   readonly closed: boolean;
   readonly newlyClosed: boolean;
+  readonly integrityViolation?: boolean;
   readonly tokensIssued: number | null;
 }
 
@@ -43,7 +45,10 @@ export interface ClosedVoteReport {
 
 export type GetClosedReportResult =
   | { readonly ok: true; readonly report: ClosedVoteReport }
-  | { readonly ok: false; readonly error: "not_found" | "vote_not_closed" };
+  | {
+      readonly ok: false;
+      readonly error: "not_found" | "vote_not_closed" | "integrity_violation";
+    };
 
 /**
  * Clôture idempotente d'un vote dont closes_at est passée (§6.5) :
@@ -112,8 +117,45 @@ export async function closeVoteIfDue(
       .groupBy(ballots.optionId);
 
     const countByOption = new Map<string, number>();
+    let totalBallots = 0;
     for (const row of ballotCounts) {
-      countByOption.set(row.optionId, Number(row.total));
+      const count = Number(row.total);
+      countByOption.set(row.optionId, count);
+      totalBallots += count;
+    }
+
+    const emargementCountRows = await tx
+      .select({ total: sql<number>`count(*)::int` })
+      .from(emargement)
+      .where(eq(emargement.voteId, voteId));
+    const tokensIssuedCount = Number(emargementCountRows[0]?.total ?? 0);
+
+    // SEC-05 : contrôle d'intégrité bloquant avant toute écriture de results
+    if (totalBallots > tokensIssuedCount) {
+      await tx
+        .update(votes)
+        .set({ privateKeyEnc: null })
+        .where(eq(votes.id, voteId));
+
+      await recordAdminAction(tx, {
+        action: "vote.integrity_alert",
+        targetType: "vote",
+        targetId: voteId,
+        reason: `Clôture bloquée : ${totalBallots} bulletins pour ${tokensIssuedCount} jetons émis`,
+      });
+
+      log("error", "vote.close.integrity_violation", {
+        voteId,
+        totalBallots,
+        tokensIssued: tokensIssuedCount,
+      });
+
+      return {
+        closed: false,
+        newlyClosed: false,
+        integrityViolation: true,
+        tokensIssued: tokensIssuedCount,
+      } as const;
     }
 
     if (allOptions.length > 0) {
@@ -125,12 +167,6 @@ export async function closeVoteIfDue(
         })),
       );
     }
-
-    const emargementCountRows = await tx
-      .select({ total: sql<number>`count(*)::int` })
-      .from(emargement)
-      .where(eq(emargement.voteId, voteId));
-    const tokensIssuedCount = Number(emargementCountRows[0]?.total ?? 0);
 
     await tx.delete(emargement).where(eq(emargement.voteId, voteId));
 
@@ -236,7 +272,13 @@ export async function getClosedVoteReportBySlug(
     return { ok: false, error: "vote_not_closed" };
   }
 
-  await closeVoteIfDue(db, pool, vote.id);
+  // SEC-16 : ne pas déclencher VACUUM emargement sur un GET public (exécuté par /api/internal/cron)
+  const closeOutcome = await closeVoteIfDue(db, pool, vote.id, {
+    skipVacuum: true,
+  });
+  if (closeOutcome.integrityViolation) {
+    return { ok: false, error: "integrity_violation" };
+  }
 
   // Relit tokens_issued après clôture idempotente
   const refreshed = (
