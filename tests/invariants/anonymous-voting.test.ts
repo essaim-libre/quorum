@@ -22,6 +22,7 @@ import { setLogSink } from "@/lib/log";
 import { resetRateLimitersForTest } from "@/lib/ratelimit";
 import { submitAnonymousBallot } from "@/lib/votes/ballot";
 import {
+  cancelPublishedVote,
   createVoteDraft,
   getPublishedVoteBySlug,
   publishVoteDraft,
@@ -36,6 +37,7 @@ describe("invariants J3 — vote anonyme phase 1 (token) et phase 2 (ballots)", 
   const pool = new Pool({ connectionString: DATABASE_URL });
   const db = drizzle(pool, { schema });
   const savedEnv: Record<string, string | undefined> = {};
+  const createdOpenVoteIds: string[] = [];
 
   beforeAll(async () => {
     await pool.query("SELECT 1");
@@ -67,6 +69,11 @@ describe("invariants J3 — vote anonyme phase 1 (token) et phase 2 (ballots)", 
   });
 
   afterAll(async () => {
+    for (const voteId of createdOpenVoteIds) {
+      await cancelPublishedVote(db, voteId, {
+        reason: "Nettoyage automatique test J3",
+      }).catch(() => {});
+    }
     setLogSink(null);
     resetRateLimitersForTest();
     await closeDb();
@@ -99,6 +106,7 @@ describe("invariants J3 — vote anonyme phase 1 (token) et phase 2 (ballots)", 
     if (!pub.ok) {
       throw new Error(`publish failed: ${pub.error}`);
     }
+    createdOpenVoteIds.push(draft.id);
     const detail = await getPublishedVoteBySlug(db, draft.slug);
     if (!detail) {
       throw new Error("published vote not found");

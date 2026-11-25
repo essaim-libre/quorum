@@ -23,7 +23,10 @@ import {
   signPetition,
   supportContreProposal,
 } from "@/lib/petitions/service";
-import { getPublishedVoteBySlug } from "@/lib/votes/service";
+import {
+  cancelPublishedVote,
+  getPublishedVoteBySlug,
+} from "@/lib/votes/service";
 
 const DATABASE_URL =
   process.env.DATABASE_URL ??
@@ -33,6 +36,7 @@ describe("pétitions — règles, seuil, expiration, soutien Contre, relecture e
   const pool = new Pool({ connectionString: DATABASE_URL });
   const db = drizzle(pool, { schema });
   const savedEnv: Record<string, string | undefined> = {};
+  const createdOpenVoteIds: string[] = [];
 
   beforeAll(async () => {
     await pool.query("SELECT 1");
@@ -64,6 +68,11 @@ describe("pétitions — règles, seuil, expiration, soutien Contre, relecture e
   });
 
   afterAll(async () => {
+    for (const voteId of createdOpenVoteIds) {
+      await cancelPublishedVote(db, voteId, {
+        reason: "Nettoyage automatique test J5",
+      }).catch(() => {});
+    }
     setLogSink(null);
     await closeDb();
     await pool.end();
@@ -269,6 +278,9 @@ describe("pétitions — règles, seuil, expiration, soutien Contre, relecture e
     if (!approved.ok || !approved.voteSlug) return;
 
     const publishedVote = await getPublishedVoteBySlug(db, approved.voteSlug);
+    if (publishedVote) {
+      createdOpenVoteIds.push(publishedVote.vote.id);
+    }
     expect(publishedVote?.vote.question).toBe(rewordText);
     expect(publishedVote?.vote.argumentContre).toBe(
       "Faible fréquentation constatée après 18 h.",
@@ -346,6 +358,9 @@ describe("pétitions — règles, seuil, expiration, soutien Contre, relecture e
 
     if (autoDetail?.voteSlug) {
       const vote = await getPublishedVoteBySlug(db, autoDetail.voteSlug);
+      if (vote) {
+        createdOpenVoteIds.push(vote.vote.id);
+      }
       expect(vote?.vote.status).toBe("open");
     }
 
