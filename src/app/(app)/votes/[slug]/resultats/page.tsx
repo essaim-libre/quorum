@@ -29,6 +29,31 @@ export default async function VoteResultsPage({
     if (res.error === "vote_not_closed") {
       redirect(`/votes/${slug}`);
     }
+    if (res.error === "integrity_violation") {
+      return (
+        <main className="quorum-container pb-6">
+          <StickyHeader
+            condensedTitle={copy.results.pageLabel}
+            backHref="/votes?view=closed"
+            backLabel={copy.votes.backToVotes}
+          />
+          <section className="quorum-section-rule mt-6 flex flex-col gap-4 py-6">
+            <h1 className="text-heading font-bold text-error">
+              {copy.results.integrityAlert}
+            </h1>
+            <p className="text-body text-ink">{copy.errors.integrity_violation}</p>
+            <div>
+              <Link
+                href="/journal"
+                className="inline-flex min-h-[48px] items-center text-body font-medium text-ink underline underline-offset-4"
+              >
+                {copy.me.journalLink}
+              </Link>
+            </div>
+          </section>
+        </main>
+      );
+    }
     notFound();
   }
 

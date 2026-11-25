@@ -16,6 +16,9 @@ coverage/
 playwright-report/
 test-results/
 
+# Studio vidéo de lancement (local uniquement, non versionné)
+video/
+
 # Logs & artefacts locaux
 *.log
 npm-debug.log*

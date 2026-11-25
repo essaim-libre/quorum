@@ -178,3 +178,13 @@ Reste :
 - Points organisationnels hors code avant ouverture pilote (§15, §17).
 Bloquant / question pour Junior :
 - Aucun.
+
+## 2026-11-25 23:06 — Antigravity — Vitrine README publique et hygiène dépôt (`video/` local)
+Fait :
+- Maintenu le studio vidéo Remotion V2 **100 % en local** (`video/` ajouté à `.gitignore`, scripts `video:*` retirés du `package.json` racine pour garder le dépôt applicatif léger et propre).
+- Généré 5 visuels optimisés (< 265 Ko au total) dans `docs/assets/` (`hero-banner.jpg`, `preview-identity.jpg`, `preview-blind.jpg`, `preview-vote.jpg`, `preview-amphi.jpg`).
+- Refondu intégralement `README.md` en vitrine moderne : bannière hero sombre, badges colorés `for-the-badge` (dont CI live), navigation rapide, galerie 2×2 de captures HD, encart prêt pour le lecteur vidéo MP4 natif GitHub (`user-attachments`), diagramme Mermaid coloré du protocole RFC 9474, tableau des 11 invariants/métriques d'audit et guide de démarrage rapide.
+Reste :
+- Glisser-déposer `video/out/quorum-launch-1080p60.mp4` sur GitHub pour obtenir l'URL `user-attachments` et activer la lecture vidéo directe dans le `README.md`.
+Bloquant / question pour Junior :
+- Aucun.
